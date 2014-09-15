@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>index</title>
+    <script type="text/javascript" src="../js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="../js/cu.js"></script>
+
+    <script type="text/javascript">
+        $(function() {
+            (function(win, cu){
+                var images = [{name: 'starcraft_32', url: '../image/starcraft.ico'}]
+                cu.loadImages(images, function() {
+                    var $div1 = $('#div1');
+                    var panel = new cu.Panel(300, 150);
+                    $div1.append(panel.div);
+                    var node = new cu.Node();
+                    node.setImageName('starcraft_32');
+                    panel.addElement(node);
+                    panel.invalidate();
+                })
+/*                var cvs = document.getElementById('aa');
+                //cvs.width = cvs.height = 200;
+                var c = cvs.getContext('2d');
+                c.fillStyle = '#000000';
+                c.beginPath();
+                c.fillRect(0, 0, 100, 100);*/
+
+            })(window, canvasUtils_);
+        });
+    </script>
+</head>
+<body>
+
+<div id="div1">
+<!--    <canvas id="aa" style="position: absolute;"></canvas>-->
+</div>
+
+</body>
+</html>
+

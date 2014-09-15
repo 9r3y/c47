@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="../js/jquery.js"></script>
+    <script type="text/javascript" src="../js/angular.js"></script>
+</head>
+<body>
+	<div>
+		<label>Name:</label>
+		<input type="text" ng-model="yourName" placeholder="Enter">
+		<hr>
+		<h1>Hello {{yourName}}!</h1>
+	</div>
+    <script>
+        var str = '2014-04-02T18:30:13.081';
+        var pattern = 'yyyy-MM-dd HH:mm:ss.SSS';
+        var arr;
+        arr = /(y+)/.exec(pattern);
+        var year = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 1970;
+        arr = /(M+)/.exec(pattern);
+        var month = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) - 1 : 0;
+        arr = /(d+)/.exec(pattern);
+        var day = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 1;
+        arr = /(H+)/.exec(pattern);
+        var hour = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 0;
+        arr = /(m+)/.exec(pattern);
+        var min = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 0;
+        arr = /(s+)/.exec(pattern);
+        var sec = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 0;
+        arr = /(S+)/.exec(pattern);
+        var ms = arr != null ? parseInt(str.substr(arr.index, arr[0].length)) : 0;
+
+        var ret = new Date();
+        ret.setFullYear(year, month, day);
+        ret.setHours(hour, min, sec, ms);
+        console.log(ret);
+
+    </script>
+</body>
+</html>

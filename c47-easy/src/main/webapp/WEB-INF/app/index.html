@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" ng-app="myApp" ng-init="name='World'">
+<head>
+<meta charset="utf-8">
+<title>My AngularJS App</title>
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/bootstrap.css" />
+<link rel="stylesheet" href="css/bootstrap-theme.css" />
+</head>
+<body>
+	<ul class="menu">
+		<li><a href="#/view1">view1</a></li>
+		<li><a href="#/view2">view2</a></li>
+	</ul>
+	<div class="container" ng-controller="TextAreaWithLimitCtrl">
+		<div class="row">
+			<span>Remaining: {{remaining()}}</span>
+		</div>
+		<div class="row">
+			<textarea ng-model="message">{{message}}</textarea>
+		</div>
+		<div class="row">
+			<button ng-disabled="!hasValidLength()" ng-click="send()">Send</button>
+			<button ng-click="clear()">Clear</button>
+		</div>
+	</div>
+
+
+	<div ng-view></div>
+
+	<div>
+		Angular seed app: v<span app-version></span>
+	</div>
+
+	<!-- In production use:
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+	-->
+	<script src="js/vendor/angular.js"></script>
+	<!--   <script src="js/vendor/angular-route.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/service/services.js"></script>
+	<script src="js/controller/controllers.js"></script>
+	<script src="js/filter/filters.js"></script>
+	<script src="js/directive/directives.js"></script> -->
+	
+	<script>
+		angular.module('myApp', ['myApp.controllers']);
+		angular.module('myApp.controllers', []).controller('TextAreaWithLimitCtrl', 
+				['$scope', function($scope) {
+			$scope.message = '';
+			$scope.remaining = function() {
+				return 100 - $scope.message.length;
+			};
+			$scope.hasValidLength = function() {
+				return $scope.message.length > 10;
+			}
+		}]);
+	</script>
+	
+</body>
+</html>

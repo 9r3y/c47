@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="../js/jquery-1.9.1.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            g_shapes = [];
+            var rect = $("#dia")[0].getBoundingClientRect();
+            var tPoint = {"x":rect.left,"y":rect.top};
+            ctx = $("#dia")[0].getContext("2d");
+
+            var c1 = new shape("c1",100,300);
+            c1.click = function(e){
+                alert(this.name+" was clicked at "+e.x+","+e.y);
+            }
+
+            var c2 = new shape("c2",400,300,"#800040");
+            c2.click = function(e){
+                alert(this.name+" was clicked at "+e.x+","+e.y);
+            }
+
+            $("#dia").click(function(env){
+                var point = {"x":env.pageX-tPoint.x,"y":env.pageY-tPoint.y};
+                for(var i=0;i<g_shapes.length;i++){
+                    g_shapes[i].reDraw(point);
+                }
+            }).mousemove(function(env){
+                        var point = {"x":env.pageX-tPoint.x,"y":env.pageY-tPoint.y};
+                        $("#pp").html(point.x+","+point.y);
+                    });
+        });
+
+        function shape(name,x,y,color){
+            this.name = name;
+            this.click = null;
+            this.x = x;
+            this.y = y;
+            this.r = 40
+            this.color = color || "#000000";
+
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.moveTo(this.x, this.y+0.5);
+            ctx.lineTo(this.x + 100, this.y+0.5);
+            ctx.moveTo(this.x, this.y+10.5);
+            ctx.lineTo(this.x + 100, this.y+10.5);
+            ctx.stroke();
+            //ctx.arc(this.x, this.y, this.r, 2 * Math.PI, 0, true);
+            //ctx.fillStyle = color;
+            //ctx.fill();
+            //ctx.closePath();
+            g_shapes.push(this);
+        }
+
+        shape.prototype.reDraw = function(point){
+            ctx.beginPath();
+            ctx.fillStyle = this.color;
+            ctx.lineWidth = 1;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + 100, this.y);
+            ctx.moveTo(this.x, this.y+10);
+            ctx.lineTo(this.x + 100, this.y+10);
+            //ctx.arc(this.x, this.y, this.r, 2 * Math.PI, 0, true);
+            if (ctx.isPointInPath(point.x,point.y)) {
+                $("#console").append("<li>"+this.name+" was clicked"+"</li>");
+                this.click.call(this,point);
+            }
+            //ctx.closePath();
+        }
+
+        shape.prototype.click = function(fn){
+            this.click = fn;
+        }
+    </script>
+</head>
+<body style="background:#eeeeee;">
+<canvas id="dia" style="border: 1px solid grey" width="800" height="400">
+</canvas>
+<div id="pp" style="display:inline" >
+</div>
+<div id="console" >
+</div>
+</body>
+</html>
