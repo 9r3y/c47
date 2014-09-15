@@ -1,0 +1,1 @@
+java -Xmx11M -Xms11M -XX:+PrintGCDetails -verbose:gc -jar ./target/c47-dog-1.0.0-SNAPSHOT.jar
