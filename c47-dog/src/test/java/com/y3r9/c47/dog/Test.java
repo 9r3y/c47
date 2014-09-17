@@ -4,6 +4,7 @@ import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.*;
 import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.Dictionary;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.CodeSource;
