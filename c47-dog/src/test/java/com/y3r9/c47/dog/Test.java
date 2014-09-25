@@ -12,6 +12,8 @@ import java.security.ProtectionDomain;
 import java.security.Provider;
 import java.security.Security;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,6 +32,14 @@ public class Test {
         quickSort(ar, 0, ar.length - 1);
         for (int elm : ar) {
             System.out.print(elm + ",");
+        }
+
+        String s = "Jul 18 15:51:45";
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd HH:mm:ss", Locale.ENGLISH);
+        try {
+            System.out.println(sdf.parse(s).toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         System.out.println("------------------------");
