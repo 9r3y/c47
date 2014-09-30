@@ -1,12 +1,16 @@
 package com.y3r9.c47.dog;
 
+import cn.com.netis.util.JarFolder;
 import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.*;
 import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.Dictionary;
+import org.apache.commons.lang.text.StrBuilder;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.Provider;
@@ -43,6 +47,7 @@ public class Test {
         }
 
         System.out.println("------------------------");
+        //DecimalFormat df1 = new DecimalFormat("####");
         //DecimalFormat df1 = new DecimalFormat("####");
         //df1.setMinimumFractionDigits(4);
         //junit.textui.TestRunner.run(new CalculatorTest());
