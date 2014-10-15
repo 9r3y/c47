@@ -39,7 +39,7 @@ public class ByteUtil {
             return null;
         }
         hexString = hexString.toUpperCase();
-        int length = hexString.length() / 2;
+        int length = hexString.length() >> 1;
         char[] hexChars = hexString.toCharArray();
         byte[] d = new byte[length];
         for (int i = 0; i < length; i++) {

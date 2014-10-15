@@ -3,14 +3,23 @@ package com.y3r9.c47.dog;
 import cn.com.netis.util.JarFolder;
 import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.*;
 import com.y3r9.c47.dog.demo.serviceprovider.dictionary.spi.Dictionary;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrBuilder;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.Provider;
@@ -38,19 +47,37 @@ public class Test {
             System.out.print(elm + ",");
         }
 
-        String s = "Jul 18 15:51:45";
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd HH:mm:ss", Locale.ENGLISH);
         try {
-            System.out.println(sdf.parse(s).toString());
+            DatatypeFactory dtf = DatatypeFactory.newInstance();
+            Duration duration = dtf.newDuration("PT1M");
+            long l = duration.getTimeInMillis(new Date(0L));
+            System.out.println(l);
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        String s = "1970-01-01T00:00:00";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = sdf.parse(s);
+            System.out.println(date.getTime());
+            System.out.println(date.toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        System.out.println("------------------------");
         //DecimalFormat df1 = new DecimalFormat("####");
         //DecimalFormat df1 = new DecimalFormat("####");
         //df1.setMinimumFractionDigits(4);
         //junit.textui.TestRunner.run(new CalculatorTest());
+    }
+
+    public void inst() {
+        //System.out.println(Paths.get(getClass().getResource("").getFile()).toString());
+        try {
+            System.out.println(ClassLoader.getSystemResource("").toURI().toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
