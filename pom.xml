@@ -13,6 +13,7 @@
     <modules>
         <module>c47-dog</module>
         <module>c47-easy</module>
+        <module>zmqsvr</module>
     </modules>
 
     <properties>
@@ -365,6 +366,12 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>1.1.0</version>
+                <classifier>fix-1</classifier>
             </dependency>
             <dependency>
                 <groupId>jdk.tools</groupId>

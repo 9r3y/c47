@@ -103,6 +103,16 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <classifier>fix-1</classifier>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.netis</groupId>
+            <artifactId>dp-commons</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
             <groupId>jdk.tools</groupId>
             <artifactId>jdk.tools</artifactId>
         </dependency>
