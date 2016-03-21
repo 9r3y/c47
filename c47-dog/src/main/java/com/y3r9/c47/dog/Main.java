@@ -3,17 +3,12 @@ package com.y3r9.c47.dog;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The class Main
@@ -21,8 +16,6 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  */
 public final class Main {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
         final URL url = Main.class.getResource("dir/");
@@ -37,19 +30,6 @@ public final class Main {
         System.out.println("getUserInfo(): " + url.getUserInfo());
         System.out.println("getProtocol(): " + url.getProtocol());
         System.out.println("getContent(): " + url.getContent().toString());
-
-        while (true) {
-            LOG.debug("foieajgoiejagoeijoj");
-            FileChannel fc = FileChannel.open(Paths.get("logs/c47.log"), StandardOpenOption.WRITE);
-            final FileLock fl = fc.tryLock();
-            fc.close();
-            System.out.println(fl == null);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
 /*        Path binFolder = Paths.get(CommonFolder.getRelativePath("projectpath:redis/bin"));
 
         final CommandLine cmdLine = buildCommandLine();
