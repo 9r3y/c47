@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,31 +46,60 @@ import org.apache.commons.codec.binary.Hex;
 
 import com.y3r9.c47.dog.util.JsonUtils;
 
+import redis.clients.jedis.Jedis;
+
 public class Test {
 
-    private static byte[] _$2 = new byte[] { (byte) 47, (byte) 1, (byte) 34, (byte) 52, (byte) 87,
-            (byte) 49, (byte) 83, (byte) 35 };
+    public static void main(String[] args) throws IOException, CloneNotSupportedException {
+        Jedis jedis = new Jedis("172.16.101.229");
+        System.out.println(jedis.get("foo"));
 
-    public static void main(String[] args) throws IOException {
-        int maxOrder = 2;
-        int maxSubpageAllocs = 1 << maxOrder;
-        // Generate the memory map.
-        byte[] memoryMap = new byte[maxSubpageAllocs << 1];
-        byte[] depthMap = new byte[memoryMap.length];
-        int memoryMapIndex = 1;
-        // 分配完成后，memoryMap->[0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3…]
-        // depthMap->[0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3…]
-        for (int d = 0; d <= maxOrder; ++ d) { // move down the tree one level at a time
-            int depth = 1 << d;
-            for (int p = 0; p < depth; ++ p) {
-                // in each level traverse left to right and set value to the depth of subtree
-                memoryMap[memoryMapIndex] = (byte) d;
-                depthMap[memoryMapIndex] = (byte) d;
-                memoryMapIndex ++;
+
+
+//        uncompressPcap();
+//        mergePcap();
+
+    }
+
+    private static void mergePcap() throws IOException {
+        Path folder = Paths.get("D:\\e\\5585\\eno\\2016041000\\out");
+        final StringBuilder sb = new StringBuilder();
+        Files.list(folder).forEach(path -> {
+            sb.append(" " + path.toString());
+        });
+        final String cmd = "mergecap -w D:\\e\\5585\\eno\\merged.pcap" + sb.toString() + " -F pcap";
+//        System.out.println(cmd);
+        Runtime.getRuntime().exec(cmd);
+    }
+
+    private static void uncompressPcap() throws IOException {
+        Path folder = Paths.get("D:\\e\\5585\\eno\\2016041000");
+        Files.list(folder).forEach(path -> {
+            final String oldName = path.getFileName().toString();
+            if (!oldName.endsWith("sz")) {
+                return;
             }
+            final int index = oldName.indexOf(".");
+            final String name = oldName.substring(0, index);
+            final Path newPath = path.getParent().resolve("out").resolve(name + ".pcap");
+            try {
+                Runtime.getRuntime().exec(String.format("java -jar D:\\APP\\netis\\dp_\\dp-tools\\bin\\dp-tools.jar uncompress -i %s -o %s",
+                        path.toString(), newPath.toString())).waitFor();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private static void duplicatePcap() throws IOException {
+        for (int i = 0; i < 120; i++) {
+            Runtime.getRuntime().exec("editcap -t " + 60 * i + " D:/e/collector_x3650/collector_x3650.pcap D:/e/collector_x3650/collector_x3650_"+i+".pcap");
         }
-        System.out.println("feag");
-        System.out.println(Integer.numberOfLeadingZeros(4));
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 120; i++) {
+            sb.append(" D:/e/collector_x3650/collector_x3650_").append(i).append(".pcap");
+        }
+        Runtime.getRuntime().exec("mergecap -w D:/e/collector_x3650/collector_x3650_merged.pcap " + sb.toString());
     }
 
     private void testWatchFolder() throws IOException {
@@ -106,6 +136,9 @@ public class Test {
 
     private static void testBrcbDES() throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, IOException, InvalidKeySpecException, DecoderException {
+        final byte[] _$2 = new byte[] { (byte) 47, (byte) 1, (byte) 34, (byte) 52, (byte) 87,
+                (byte) 49, (byte) 83, (byte) 35 };
+
         String key = "f31120800015510912";
         SecretKeySpec sk = new SecretKeySpec(key.getBytes(), "DES");
         byte[] var1 = new byte[] { (byte) 97, (byte) 100, (byte) 85, (byte) 115, (byte) 37,
