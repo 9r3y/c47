@@ -1,7 +1,12 @@
 package com.y3r9.c47.dog;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -18,19 +23,28 @@ import java.security.CodeSource;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.ProtectionDomain;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.BitSet;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -51,14 +65,120 @@ import redis.clients.jedis.Jedis;
 public class Test {
 
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
-        Jedis jedis = new Jedis("172.16.101.229");
-        System.out.println(jedis.get("foo"));
-
-
-
+//        System.out.println(new Date(TimeUnit.NANOSECONDS.toMillis(1462431601000000000L)));
+//        Jedis jedis = new Jedis("172.16.101.229");
+//        System.out.println(jedis.get("foo"));
+//        sumKeyValue();
 //        uncompressPcap();
 //        mergePcap();
+        dispSumKeyValue();
+//        sumKeyValue();
+    }
 
+    private static void dispSumKeyValue() {
+        List<Path> paths = new ArrayList<>();
+        paths.add(Paths.get("D:\\e\\byz\\20160505145900_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150000_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150100_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150200_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150300_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150400_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150500_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150600_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150700_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150800_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505150900_0.xflow"));
+        paths.add(Paths.get("D:\\e\\byz\\20160505151000_0.xflow"));
+        for (Path path : paths) {
+
+            try {
+                Process process = Runtime.getRuntime().exec(String.format("python D:\\e\\correctness\\disp-nflow\\disp-nflow.pyc %s --load-template %s",
+                        path.toString(), "D:\\e\\xflowbzq\\nflow.template"));
+                InputStream is = process.getInputStream();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String line;
+                long sum = 0;
+                long earliest = Long.MAX_VALUE;
+                long latest = 0;
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                sdf.setTimeZone(TimeZone.getDefault());
+                while ((line = br.readLine()) != null) {
+                    final String[] kvs = line.split(",");
+                    final Map<String, String> map = new HashMap<>();
+                    for (String kv : kvs) {
+                        if (!kv.contains("=")) {
+                            continue;
+                        }
+                        String[] k_v = kv.split("=");
+                        map.put(k_v[0].trim(), k_v[1].trim());
+                    }
+                    String str = map.get("packetDeltaCount");
+                    if (str != null) {
+                        final int num = Integer.parseInt(str);
+                        sum += num;
+                    }
+                    str = map.get("monitoringIntervalStartMilliSeconds");
+                    if (str != null) {
+                        long time = sdf.parse(str).getTime();
+                        if (time < earliest) {
+                            earliest = time;
+                        }
+                        if (time > latest) {
+                            latest = time;
+                        }
+                    }
+                }
+                System.out.println(String.format("%s: %s start: %s end: %s", path.getFileName(), sum, sdf.format(new Date(earliest)), sdf.format(new Date(latest))));
+                process.waitFor();
+            } catch (IOException | InterruptedException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void sumKeyValue() {
+        List<Path> paths = new ArrayList<>();
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505145900.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150000.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150100.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150200.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150300.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150400.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150500.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150600.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150700.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150800.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150900.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505151000.nta"));
+        for (Path path : paths) {
+            try {
+                List<String> lines = Files.readAllLines(path);
+                long sum = 0;
+                for (String line : lines) {
+                    final String[] kvs = line.split("\t");
+                    final Map<String, String> map = new HashMap<>();
+                    for (String kv : kvs) {
+                        if (!kv.contains("=")) {
+                            map.put("ts", kv);
+                            continue;
+                        }
+                        String[] k_v = kv.split("=");
+                        map.put(k_v[0], k_v[1]);
+                    }
+                    if (map.get("ts").contains(":")) {
+                        String str = map.get("PktCnt_Sum");
+                        if (str != null) {
+                            final int num = Integer.parseInt(str);
+                            sum += num;
+                        }
+                    }
+                }
+                System.out.println(String.format("%s: %s", path.getFileName(), sum));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static void mergePcap() throws IOException {
