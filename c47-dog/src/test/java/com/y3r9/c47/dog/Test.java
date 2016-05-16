@@ -1,6 +1,7 @@
 package com.y3r9.c47.dog;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -64,162 +68,15 @@ import redis.clients.jedis.Jedis;
 
 public class Test {
 
-    public static void main(String[] args) throws IOException, CloneNotSupportedException {
+    public static void main(String[] args) throws IOException, CloneNotSupportedException, XMLStreamException {
 //        System.out.println(new Date(TimeUnit.NANOSECONDS.toMillis(1462431601000000000L)));
 //        Jedis jedis = new Jedis("172.16.101.229");
 //        System.out.println(jedis.get("foo"));
-//        sumKeyValue();
-//        uncompressPcap();
-//        mergePcap();
-        dispSumKeyValue();
-//        sumKeyValue();
-    }
 
-    private static void dispSumKeyValue() {
-        List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get("D:\\e\\byz\\20160505145900_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150000_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150100_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150200_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150300_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150400_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150500_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150600_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150700_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150800_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505150900_0.xflow"));
-        paths.add(Paths.get("D:\\e\\byz\\20160505151000_0.xflow"));
-        for (Path path : paths) {
+        final String str = "aa";
+        final String str1 = str.substring(2);
+        System.out.println("s");
 
-            try {
-                Process process = Runtime.getRuntime().exec(String.format("python D:\\e\\correctness\\disp-nflow\\disp-nflow.pyc %s --load-template %s",
-                        path.toString(), "D:\\e\\xflowbzq\\nflow.template"));
-                InputStream is = process.getInputStream();
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                long sum = 0;
-                long earliest = Long.MAX_VALUE;
-                long latest = 0;
-                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                sdf.setTimeZone(TimeZone.getDefault());
-                while ((line = br.readLine()) != null) {
-                    final String[] kvs = line.split(",");
-                    final Map<String, String> map = new HashMap<>();
-                    for (String kv : kvs) {
-                        if (!kv.contains("=")) {
-                            continue;
-                        }
-                        String[] k_v = kv.split("=");
-                        map.put(k_v[0].trim(), k_v[1].trim());
-                    }
-                    String str = map.get("packetDeltaCount");
-                    if (str != null) {
-                        final int num = Integer.parseInt(str);
-                        sum += num;
-                    }
-                    str = map.get("monitoringIntervalStartMilliSeconds");
-                    if (str != null) {
-                        long time = sdf.parse(str).getTime();
-                        if (time < earliest) {
-                            earliest = time;
-                        }
-                        if (time > latest) {
-                            latest = time;
-                        }
-                    }
-                }
-                System.out.println(String.format("%s: %s start: %s end: %s", path.getFileName(), sum, sdf.format(new Date(earliest)), sdf.format(new Date(latest))));
-                process.waitFor();
-            } catch (IOException | InterruptedException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void sumKeyValue() {
-        List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505145900.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150000.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150100.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150200.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150300.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150400.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150500.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150600.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150700.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150800.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150900.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505151000.nta"));
-        for (Path path : paths) {
-            try {
-                List<String> lines = Files.readAllLines(path);
-                long sum = 0;
-                for (String line : lines) {
-                    final String[] kvs = line.split("\t");
-                    final Map<String, String> map = new HashMap<>();
-                    for (String kv : kvs) {
-                        if (!kv.contains("=")) {
-                            map.put("ts", kv);
-                            continue;
-                        }
-                        String[] k_v = kv.split("=");
-                        map.put(k_v[0], k_v[1]);
-                    }
-                    if (map.get("ts").contains(":")) {
-                        String str = map.get("PktCnt_Sum");
-                        if (str != null) {
-                            final int num = Integer.parseInt(str);
-                            sum += num;
-                        }
-                    }
-                }
-                System.out.println(String.format("%s: %s", path.getFileName(), sum));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void mergePcap() throws IOException {
-        Path folder = Paths.get("D:\\e\\5585\\eno\\2016041000\\out");
-        final StringBuilder sb = new StringBuilder();
-        Files.list(folder).forEach(path -> {
-            sb.append(" " + path.toString());
-        });
-        final String cmd = "mergecap -w D:\\e\\5585\\eno\\merged.pcap" + sb.toString() + " -F pcap";
-//        System.out.println(cmd);
-        Runtime.getRuntime().exec(cmd);
-    }
-
-    private static void uncompressPcap() throws IOException {
-        Path folder = Paths.get("D:\\e\\5585\\eno\\2016041000");
-        Files.list(folder).forEach(path -> {
-            final String oldName = path.getFileName().toString();
-            if (!oldName.endsWith("sz")) {
-                return;
-            }
-            final int index = oldName.indexOf(".");
-            final String name = oldName.substring(0, index);
-            final Path newPath = path.getParent().resolve("out").resolve(name + ".pcap");
-            try {
-                Runtime.getRuntime().exec(String.format("java -jar D:\\APP\\netis\\dp_\\dp-tools\\bin\\dp-tools.jar uncompress -i %s -o %s",
-                        path.toString(), newPath.toString())).waitFor();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private static void duplicatePcap() throws IOException {
-        for (int i = 0; i < 120; i++) {
-            Runtime.getRuntime().exec("editcap -t " + 60 * i + " D:/e/collector_x3650/collector_x3650.pcap D:/e/collector_x3650/collector_x3650_"+i+".pcap");
-        }
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 120; i++) {
-            sb.append(" D:/e/collector_x3650/collector_x3650_").append(i).append(".pcap");
-        }
-        Runtime.getRuntime().exec("mergecap -w D:/e/collector_x3650/collector_x3650_merged.pcap " + sb.toString());
     }
 
     private void testWatchFolder() throws IOException {
