@@ -3,6 +3,8 @@ package com.y3r9.c47.dog
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 
+import scala.beans.BeanProperty
+
 /**
   * Created by Ethan.Zhou on 2016/4/13.
   */
@@ -18,6 +20,21 @@ object WordCount {
       .reduceByKey(_ + _)
     wordCounts.saveAsTextFile(outputPath)
     println(wordCounts.first)
+
+
+    val wtext = sc.wholeTextFiles("redis/src/*.[ch]")
+    val fwds = wtext.
+      flatMap{ case (filename, contents) =>
+        val fname = filename.substring(filename.lastIndexOf("/") + 1)
+        contents.
+          split("\\W+").
+          filter(!_.isEmpty).
+          map( word => (fname, word))
+      }
+    fwds.cache()
+    val f = (1 to 9).map(_ * 8)
+
   }
+
 
 }
