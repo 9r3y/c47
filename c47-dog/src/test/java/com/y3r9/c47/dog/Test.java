@@ -68,14 +68,13 @@ import redis.clients.jedis.Jedis;
 
 public class Test {
 
+
     public static void main(String[] args) throws IOException, CloneNotSupportedException, XMLStreamException {
 //        System.out.println(new Date(TimeUnit.NANOSECONDS.toMillis(1462431601000000000L)));
 //        Jedis jedis = new Jedis("172.16.101.229");
 //        System.out.println(jedis.get("foo"));
 
-        final String str = "aa";
-        final String str1 = str.substring(2);
-        System.out.println("s");
+
 
     }
 
