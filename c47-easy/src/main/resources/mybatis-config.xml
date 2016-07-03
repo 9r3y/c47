@@ -11,6 +11,6 @@
     </settings>
 
     <typeAliases>
-        <typeAlias alias="User" type="com.y3r9.c47.easy.domain.User"/>
+        <typeAlias alias="User" type="com.y3r9.c47.easy.main.domain.User"/>
     </typeAliases>
 </configuration>

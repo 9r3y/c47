@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="console.debug" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+    <appender name="console.info" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+    <appender name="console.warn" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+    <appender name="console.error" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file.debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.basepath}/debug.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log.basepath}/debug.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>64MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file.info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.basepath}/info.log</file>
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log.basepath}/info.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>64MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file.warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.basepath}/warn.log</file>
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log.basepath}/warn.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>32MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file.error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.basepath}/error.log</file>
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log.basepath}/error.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>32MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%t] [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <!--<appender-ref ref="console.debug" />-->
+        <appender-ref ref="console.info" />
+        <appender-ref ref="console.warn"/>
+        <appender-ref ref="console.error"/>
+
+        <!--<appender-ref ref="file.debug"/>-->
+        <appender-ref ref="file.info"/>
+        <appender-ref ref="file.warn"/>
+        <appender-ref ref="file.error"/>
+    </root>
+</configuration>

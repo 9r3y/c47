@@ -61,6 +61,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.zlex.chapter07_1.DESCoder;
 
 import com.y3r9.c47.dog.util.JsonUtils;
 
@@ -68,14 +69,16 @@ import redis.clients.jedis.Jedis;
 
 public class Test {
 
-    public static void main(String[] args) throws IOException, CloneNotSupportedException, XMLStreamException {
+    public static void main(String[] args) throws Exception {
 //        System.out.println(new Date(TimeUnit.NANOSECONDS.toMillis(1462431601000000000L)));
 //        Jedis jedis = new Jedis("172.16.101.229");
 //        System.out.println(jedis.get("foo"));
 
-        final String str = "aa";
-        final String str1 = str.substring(2);
-        System.out.println("s");
+        final String str = "aaaaalflaeaaaaaf";
+        byte[] key = DESCoder.initKey();
+        byte[] encrypted = DESCoder.encrypt(str.getBytes(), key);
+        System.out.println(encrypted.length);
+
 
     }
 

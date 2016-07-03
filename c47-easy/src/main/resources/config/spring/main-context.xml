@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/context 
+    	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    	http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <import resource="main-service.xml" />
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="ignoreAcceptHeader" value="true" />
+        <property name="defaultContentType" value="text/html" />
+        <property name="mediaTypes">
+            <value>
+                json=application/json
+                xml=application/xml
+            </value>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="com.y3r9.c47.easy.main.**" />
+
+    <mvc:resources mapping="/static/**" location="/WEB-INF/resources/" />
+
+    <!--<context:property-placeholder location="classpath:*.properties"/>-->
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <util:list id="messageConverters">
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.FormHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+            </util:list>
+        </property>
+    </bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" />
+                <!--<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="prefix" value="/WEB-INF/views/velocity" />
+                    <property name="suffix" value=".vm" />
+                </bean>-->
+                <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+                    <property name="cache" value="false" />
+                    <property name="prefix" value="" />
+                    <property name="suffix" value=".ftl" />
+                    <property name="contentType" value="text/html;charset=utf-8" />
+                    <property name="requestContextAttribute" value="rc"/>
+                    <property name="exposeRequestAttributes" value="true" />
+                    <property name="exposeSessionAttributes" value="true" />
+                    <property name="exposeSpringMacroHelpers" value="true" />
+                </bean>
+            </list>
+        </property>
+        <property name="defaultViews">
+            <list>
+                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="freemarkerSettings">
+            <props>
+                <!--<prop key="auto_import">macro/spring.ftl as spring</prop>-->
+                <prop key="number_format">#</prop>
+                <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+            </props>
+        </property>
+        <property name="templateLoaderPaths">
+            <array>
+                <value>/WEB-INF/views/freemarker/</value>
+            </array>
+        </property>
+        <property name="defaultEncoding" value="utf-8" />
+    </bean>
+
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="1024" />
+        <property name="defaultEncoding" value="UTF-8" />
+    </bean>
+
+<!--    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>messages</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="validator"
+        class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="validationMessageSource" ref="messageSource" />
+    </bean>-->
+</beans>

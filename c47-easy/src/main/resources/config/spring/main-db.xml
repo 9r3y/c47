@@ -58,7 +58,7 @@
 
     <!-- 配置AOP切面 -->
     <aop:config>
-        <aop:advisor pointcut="execution(* com.y3r9.c47.easy.service..*Service.*(..))" advice-ref="txAdvice"/>
+        <aop:advisor pointcut="execution(* com.y3r9.c47.easy.main.service..*Service.*(..))" advice-ref="txAdvice"/>
     </aop:config>
 
     <!-- 使用annotation注解方式配置事务 -->
@@ -67,7 +67,7 @@
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="configLocation" value="classpath:mybatis-config.xml"></property>
-        <property name="mapperLocations" value="classpath:mapper/postgresql/**/*Mapper.xml"></property>
+        <property name="mapperLocations" value="classpath:mapper/postgresql/UserMapper.xml"></property>
     </bean>
 
     <!-- 配置SQLSession模板 -->
@@ -76,7 +76,7 @@
     </bean>
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.y3r9.c47.easy.dao"/>
+        <property name="basePackage" value="com.y3r9.c47.easy.main.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
     </bean>
 

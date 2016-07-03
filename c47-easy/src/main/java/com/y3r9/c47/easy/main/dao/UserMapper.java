@@ -1,6 +1,6 @@
-package com.y3r9.c47.easy.dao;
+package com.y3r9.c47.easy.main.dao;
 
-import com.y3r9.c47.easy.domain.User;
+import com.y3r9.c47.easy.main.domain.User;
 
 import java.util.List;
 

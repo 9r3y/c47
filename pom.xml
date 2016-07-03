@@ -18,9 +18,8 @@
 
     <properties>
         <project.build.sourceencoding>UTF-8</project.build.sourceencoding>
-        <spring.version>3.2.4.RELEASE</spring.version>
+        <spring.version>4.3.0.RELEASE</spring.version>
         <junit.version>4.11</junit.version>
-        <servlet.version>2.5</servlet.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <hibernate.version>4.1.2.Final</hibernate.version>
         <slf4j.version>1.7.5</slf4j.version>
@@ -151,19 +150,19 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.scala-tools</groupId>-->
+                <!--<artifactId>maven-scala-plugin</artifactId>-->
+                <!--<version>2.15.2</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>compile</goal>-->
+                            <!--<goal>testCompile</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
 
         <testResources>
@@ -178,8 +177,8 @@
         <dependencies>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>${servlet.version}</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -242,6 +241,16 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-aop</artifactId>
                 <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-web</artifactId>
+                <version>4.1.0.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-config</artifactId>
+                <version>4.1.0.RELEASE</version>
             </dependency>
 
             <dependency>
@@ -333,7 +342,7 @@
             <dependency>
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
-                <version>2.3.19</version>
+                <version>2.3.23</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
@@ -426,6 +435,11 @@
                 <groupId>org.apache.lucene</groupId>
                 <artifactId>lucene-core</artifactId>
                 <version>6.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.54</version>
             </dependency>
 
 

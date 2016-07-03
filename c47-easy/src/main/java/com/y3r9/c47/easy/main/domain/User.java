@@ -1,4 +1,4 @@
-package com.y3r9.c47.easy.domain;
+package com.y3r9.c47.easy.main.domain;
 
 /**
  * Created by zyq on 2014/8/7.

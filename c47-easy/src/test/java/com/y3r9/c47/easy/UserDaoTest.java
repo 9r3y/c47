@@ -1,7 +1,7 @@
 package com.y3r9.c47.easy;
 
-import com.y3r9.c47.easy.dao.UserMapper;
-import com.y3r9.c47.easy.domain.User;
+import com.y3r9.c47.easy.main.dao.UserMapper;
+import com.y3r9.c47.easy.main.domain.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
