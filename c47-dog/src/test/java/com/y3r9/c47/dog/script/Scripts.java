@@ -71,7 +71,8 @@ public class Scripts {
 //        paths.add(Paths.get("D:\\e\\xflowbyz2\\20160512155600_0.nflow"));
 
 //        paths.add(Paths.get("D:\\e\\nflow\\v9\\nflow9_1503.nflow"));
-        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160513174118.dump"));
+//        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160513174118.dump"));
+        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nflow"));
         for (Path path : paths) {
 
             try {
@@ -80,7 +81,7 @@ public class Scripts {
 //                          path.toString(), "D:\\e\\xflowbyz2\\v9.template");
                           path.toString(), "D:\\e\\nflow\\v9\\nflow.template");
                 Process process = Runtime.getRuntime().exec(cmd);
-                System.out.println(cmd);
+//                System.out.println(cmd);
                 InputStream is = process.getInputStream();
 
                 BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -114,21 +115,25 @@ public class Scripts {
                     if (str != null) {
                         mism = innerSdf.parse(str).getTime();
                     }
-                    if (mism < leftMism|| mism >= rightMism) {
-                        continue;
+//                    if (mism < leftMism|| mism >= rightMism) {
+//                        continue;
+//                    }
+                    if (pktExpTime > 0) {
+                        sum.setExpTime(pktExpTime);
                     }
-                    sum.setExpTime(pktExpTime);
-                    sum.setMonitoringIntervalStartMilliSeconds(mism);
+                    if (mism > 0) {
+                        sum.setMonitoringIntervalStartMilliSeconds(mism);
+                    }
 
-                    final String srcIp = map.get("sourceIPv4Address");
-                    final String destIp = map.get("destinationIPv4Address");
-                    if (srcIp == null || destIp == null) {
-                        continue;
-                    }
-                    if (!("192.168.22.23".equals(srcIp) && "172.16.11.185".equals(destIp))
-                            &&  !("192.168.22.23".equals(destIp) && "172.16.11.185".equals(srcIp))) {
-                        continue;
-                    }
+//                    final String srcIp = map.get("sourceIPv4Address");
+//                    final String destIp = map.get("destinationIPv4Address");
+//                    if (srcIp == null || destIp == null) {
+//                        continue;
+//                    }
+//                    if (!("192.168.22.23".equals(srcIp) && "172.16.11.185".equals(destIp))
+//                            &&  !("192.168.22.23".equals(destIp) && "172.16.11.185".equals(srcIp))) {
+//                        continue;
+//                    }
 
                     str = map.get("packetDeltaCount");
                     if (str != null) {
@@ -338,9 +343,10 @@ public class Scripts {
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.nta"));
 
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.nta"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160511173100_0.ipfix.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\nflow9_1503.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160511173100_0.ipfix.nta"));
 //        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160512150400_0.nta"));
+        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nta"));
         final SimpleDateFormat tsSdf = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
         long leftTs = tsSdf.parse("2016-05-12 15:04:00").getTime();
         long rightTs = tsSdf.parse("2016-05-12 15:05:00").getTime();
@@ -365,23 +371,24 @@ public class Scripts {
                         continue;
                     }
                     long ts = tsSdf.parse(str).getTime();
+
 //                    if (ts < leftTs || ts >= rightTs) {
 //                        continue;
 //                    }
 
-                    final String srcIp = map.get("SrcIp");
-                    final String destIp = map.get("DestIp");
-                    if (srcIp == null || destIp == null) {
-                        continue;
-                    }
+//                    final String srcIp = map.get("SrcIp");
+//                    final String destIp = map.get("DestIp");
+//                    if (srcIp == null || destIp == null) {
+//                        continue;
+//                    }
 //                    final String ip1 = String.valueOf(IpText.toIp("192.168.22.23"));
 //                    final String ip2 = String.valueOf(IpText.toIp("172.16.11.185"));
-                    final String ip = String.valueOf(IpText.toIp("182.248.53.84"));
+//                    final String ip = String.valueOf(IpText.toIp("182.248.53.84"));
 //                    if (!(ip1.equals(srcIp) && ip2.equals(destIp))
 //                            &&  !(ip1.equals(destIp) && ip2.equals(srcIp))) {
-                    if (!ip.equals(srcIp) && !ip.equals(destIp)) {
-                        continue;
-                    }
+//                    if (!ip.equals(srcIp) && !ip.equals(destIp)) {
+//                        continue;
+//                    }
 
                     sum.setTs(ts);
                     str = map.get("PktCnt_Sum");
