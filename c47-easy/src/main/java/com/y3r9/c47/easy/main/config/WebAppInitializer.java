@@ -6,6 +6,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import com.y3r9.c47.easy.config.SecurityConfig;
+
 /**
  * The class WebAppInitializer.
  *

@@ -31,7 +31,11 @@
 
     <context:component-scan base-package="com.y3r9.c47.easy.main.**" />
 
-    <mvc:resources mapping="/static/**" location="/WEB-INF/resources/" />
+    <mvc:resources mapping="/resources/js/**" location="/WEB-INF/js/" />
+    <mvc:resources mapping="/resources/css/**" location="/WEB-INF/css/" />
+    <mvc:resources mapping="/resources/image/**" location="/WEB-INF/image/" />
+    <mvc:resources mapping="/resources/fonts/**" location="/WEB-INF/fonts/" />
+    <mvc:resources mapping="/resources/html/**" location="/WEB-INF/html/" />
 
     <!--<context:property-placeholder location="classpath:*.properties"/>-->
 
