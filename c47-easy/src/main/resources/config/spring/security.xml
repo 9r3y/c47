@@ -3,22 +3,27 @@
 <b:beans xmlns="http://www.springframework.org/schema/security"
     xmlns:b="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-    <http>
+    <http access-decision-manager-ref="accessDecisionManager">
         <csrf disabled="true" />
         <intercept-url pattern="/login*" access="permitAll" />
+        <intercept-url pattern="/admin/**/*" access="ROLE_ADMIN,AUTHENTICATED" />
         <intercept-url pattern="/resources/**" access="permitAll" />
         <intercept-url pattern="/**" access="authenticated" />
         <form-login login-page="/login" />
         <remember-me />
-        <logout logout-url="/logout"/>
+        <logout logout-url="/logout" />
     </http>
 
     <authentication-manager>
         <authentication-provider>
             <user-service>
+                <user name="admin" password="admin" authorities="ROLE_ADMIN" />
+                <user name="user" password="user" authorities="ROLE_USER" />
                 <user authorities="ROLE_SCARVAREZ_MEMBER" name="car" password="scarvarez" />
                 <user authorities="ROLE_SCARVAREZ_MEMBER" name="mon" password="scarvarez" />
                 <user authorities="ROLE_SCARVAREZ_MEMBER" name="bea" password="scarvarez" />
@@ -27,9 +32,13 @@
         </authentication-provider>
     </authentication-manager>
 
-<!--    <user-service>
-        <user name="admin" password="admin" authorities="ROLE_USER,ROLE_ADMIN" />
-        <user name="user" password="user" authorities="ROLE_USER" />
-    </user-service>-->
+    <b:bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+        <b:constructor-arg>
+            <util:list>
+                <b:bean class="org.springframework.security.access.vote.RoleVoter"/>
+                <b:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+            </util:list>
+        </b:constructor-arg>
+    </b:bean>
 
 </b:beans>
