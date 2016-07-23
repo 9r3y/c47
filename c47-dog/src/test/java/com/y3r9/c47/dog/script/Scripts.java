@@ -33,6 +33,78 @@ import com.y3r9.c47.dog.IpText;
 public class Scripts {
 
     @Test
+    public void test1() throws IOException {
+        List<Path> ntss = new ArrayList<>();
+        ntss.add(Paths.get("D:\\e\\loadnts2\\20160705120000_0@1m.nts"));
+//        ntss.add(Paths.get("D:\\e\\loadnts2\\20160706T105652F692694Rixo\\20160705120000_0.nts"));
+//        ntss.add(Paths.get("D:\\e\\loadnts2\\20160706T105652F692694Rixo\\20160705120000_1.nts"));
+        Set<IpPortPair> ntsSet = new HashSet<>();
+        for (Path path : ntss) {
+            List<String> lines = Files.readAllLines(path);
+            int i = 1;
+            for (String line : lines) {
+                final String[] kvs = line.split("\t");
+                final Map<String, String> map = new HashMap<>();
+                for (String kv : kvs) {
+                    if (!kv.contains("=")) {
+                        map.put("ts", kv);
+                        continue;
+                    }
+                    String[] k_v = kv.split("=");
+                    map.put(k_v[0], k_v[1]);
+                }
+                IpPortPair ipPortPair = new IpPortPair();
+                ipPortPair.setSrcIp(map.get("SrcIp"));
+                ipPortPair.setDestIp(map.get("DestIp"));
+                ipPortPair.setSrcPort(map.get("SrcPort"));
+                ipPortPair.setDestPort(map.get("DestPort"));
+                ipPortPair.setPath(path);
+                ipPortPair.setLine(i++);
+                ntsSet.add(ipPortPair);
+            }
+        }
+
+        System.out.println(ntsSet.size());
+
+        List<Path> ntas = new ArrayList<>();
+        ntas.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160705120000_0@1m.nts.cpt.nta"));
+//        ntas.add(Paths.get("D:\\e\\loadnts2\\20160706T105458F634251Rdtx\\nta\\20160705120000_0.nta"));
+//        ntas.add(Paths.get("D:\\e\\loadnts2\\20160706T105458F634251Rdtx\\nta\\20160705120000_1.nta"));
+        Set<IpPortPair> ntaSet = new HashSet<>();
+        for (Path path : ntas) {
+            List<String> lines = Files.readAllLines(path);
+            int i = 1;
+            for (String line : lines) {
+                final String[] kvs = line.split("\t");
+                final Map<String, String> map = new HashMap<>();
+                for (String kv : kvs) {
+                    if (!kv.contains("=")) {
+                        map.put("ts", kv);
+                        continue;
+                    }
+                    String[] k_v = kv.split("=");
+                    map.put(k_v[0], k_v[1]);
+                }
+                IpPortPair ipPortPair = new IpPortPair();
+                ipPortPair.setSrcIp(map.get("SrcIp"));
+                ipPortPair.setDestIp(map.get("DestIp"));
+                ipPortPair.setSrcPort(map.get("SrcPort"));
+                ipPortPair.setDestPort(map.get("DestPort"));
+                ipPortPair.setPath(path);
+                ipPortPair.setLine(i++);
+                ntaSet.add(ipPortPair);
+            }
+        }
+        System.out.println(ntaSet.size());
+
+        for (IpPortPair nts : ntsSet) {
+            if (!ntaSet.contains(nts)) {
+                System.out.println(nts);
+            }
+        }
+    }
+
+    @Test
     public void dumpNetFlowData() {
         List<Path> paths = new ArrayList<>();
         paths.add(Paths.get("D:\\e\\nflow\\v9\\nflow9_1503.pcap"));
@@ -72,14 +144,17 @@ public class Scripts {
 
 //        paths.add(Paths.get("D:\\e\\nflow\\v9\\nflow9_1503.nflow"));
 //        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160513174118.dump"));
-        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nflow"));
+//        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nflow"));
+//        paths.add(Paths.get("D:\\e\\transtime\\20160526171900_0.nflow"));
+        paths.add(Paths.get("D:\\e\\transtime\\20160526172000_0.nflow"));
         for (Path path : paths) {
 
             try {
                 final String cmd = String.format("python D:\\e\\correctness\\disp-nflow\\disp-nflow.pyc %s --show-all-fields --load-template %s",
 //                        path.toString(), "D:\\e\\xflowbzq\\nflow.template");
 //                          path.toString(), "D:\\e\\xflowbyz2\\v9.template");
-                          path.toString(), "D:\\e\\nflow\\v9\\nflow.template");
+//                          path.toString(), "D:\\e\\nflow\\v9\\nflow.template");
+                            path.toString(), "D:\\e\\transtime\\nflow.template");
                 Process process = Runtime.getRuntime().exec(cmd);
 //                System.out.println(cmd);
                 InputStream is = process.getInputStream();
@@ -150,12 +225,14 @@ public class Scripts {
                         final long num = Long.parseLong(str);
                         sum.setSumServerRespTime(sum.getSumServerRespTime() + num);
                     }
-                    str = map.get("transactionCountDelta");
+//                    str = map.get("transactionCountDelta");
+                    str = map.get("RESERVED42041");
                     if (str != null) {
                         final long num = Long.parseLong(str);
                         sum.setTransactionCountDelta(sum.getTransactionCountDelta() + num);
                     }
-                    str = map.get("sumTotalRespTime");
+//                    str = map.get("sumTotalRespTime");
+                    str = map.get("RESERVED42077");
                     if (str != null) {
                         final long num = Long.parseLong(str);
                         sum.setSumTotalRespTime(sum.getSumTotalRespTime() + num);
@@ -341,12 +418,13 @@ public class Scripts {
 
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155500.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160526171900_0.nta"));
 
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160511173100_0.ipfix.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\nflow9_1503.nta"));
 //        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160512150400_0.nta"));
-        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nta"));
+//        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nta"));
         final SimpleDateFormat tsSdf = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
         long leftTs = tsSdf.parse("2016-05-12 15:04:00").getTime();
         long rightTs = tsSdf.parse("2016-05-12 15:05:00").getTime();

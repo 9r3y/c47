@@ -9,27 +9,39 @@
     <http>
         <csrf disabled="true" />
         <intercept-url pattern="/login*" access="permitAll" />
-        <intercept-url pattern="/resources/**" access="permitAll" />
-        <intercept-url pattern="/**" access="authenticated" />
+        <intercept-url pattern="/resources/**/*" access="permitAll" />
+        <intercept-url pattern="/admin/**/*" access="ROLE_ADMIN" />
+        <intercept-url pattern="/" access="authenticated" />
         <form-login login-page="/login" />
         <remember-me />
-        <logout logout-url="/logout"/>
+        <logout logout-url="/logout" />
     </http>
 
-    <authentication-manager>
-        <authentication-provider>
-            <user-service>
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="car" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="mon" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="bea" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="andr" password="scarvarez" />
-            </user-service>
-        </authentication-provider>
-    </authentication-manager>
+<!--    <http>
+        <intercept-url pattern="/api/**/*" access="authenticated" />
+        <http-basic />
+        <custom-filter ref="digestFilter" before="BASIC_AUTH_FILTER"/>
+    </http>-->
 
-<!--    <user-service>
+    <user-service id="userService">
         <user name="admin" password="admin" authorities="ROLE_USER,ROLE_ADMIN" />
         <user name="user" password="user" authorities="ROLE_USER" />
-    </user-service>-->
+    </user-service>
+
+    <authentication-manager>
+        <authentication-provider user-service-ref="userService" />
+    </authentication-manager>
+
+    <b:bean id="digestFilter" class=
+        "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+        <b:property name="userDetailsService" ref="userService" />
+        <b:property name="authenticationEntryPoint" ref="digestEntryPoint" />
+    </b:bean>
+    <b:bean id="digestEntryPoint" class=
+        "org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+        <b:property name="realmName" value="terrormovies-realm" />
+        <b:property name="key" value="terrorific" />
+    </b:bean>
+
 
 </b:beans>

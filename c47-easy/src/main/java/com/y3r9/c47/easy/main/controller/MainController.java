@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/")
-public class RootController {
+public class MainController {
 	
     @GetMapping
     public String indexPage(Model model) {

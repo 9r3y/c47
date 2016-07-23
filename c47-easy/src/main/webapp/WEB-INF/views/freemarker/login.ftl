@@ -48,7 +48,7 @@
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <#--<script src="./Signin Template for Bootstrap_files/ie10-viewport-bug-workaround.js"></script>-->
 <script src="${rc.getContextPath()}/resources/js/jquery/jquery-3.0.0.js"></script>
-<script src="${rc.getContextPath()}/resources/js//bootstrap.js"></script>
+<script src="${rc.getContextPath()}/resources/js/bootstrap/bootstrap.js"></script>
 
 
 </body></html>

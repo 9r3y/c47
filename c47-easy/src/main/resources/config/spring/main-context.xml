@@ -16,18 +16,7 @@
 
     <import resource="main-service.xml" />
 
-    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
-
-    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-        <property name="ignoreAcceptHeader" value="true" />
-        <property name="defaultContentType" value="text/html" />
-        <property name="mediaTypes">
-            <value>
-                json=application/json
-                xml=application/xml
-            </value>
-        </property>
-    </bean>
+    <mvc:annotation-driven />
 
     <context:component-scan base-package="com.y3r9.c47.easy.main.**" />
 
@@ -50,31 +39,15 @@
         </property>
     </bean>
 
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-        <property name="viewResolvers">
-            <list>
-                <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" />
-                <!--<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-                    <property name="prefix" value="/WEB-INF/views/velocity" />
-                    <property name="suffix" value=".vm" />
-                </bean>-->
-                <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
-                    <property name="cache" value="false" />
-                    <property name="prefix" value="" />
-                    <property name="suffix" value=".ftl" />
-                    <property name="contentType" value="text/html;charset=utf-8" />
-                    <property name="requestContextAttribute" value="rc"/>
-                    <property name="exposeRequestAttributes" value="true" />
-                    <property name="exposeSessionAttributes" value="true" />
-                    <property name="exposeSpringMacroHelpers" value="true" />
-                </bean>
-            </list>
-        </property>
-        <property name="defaultViews">
-            <list>
-                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
-            </list>
-        </property>
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="cache" value="false" />
+        <property name="prefix" value="" />
+        <property name="suffix" value=".ftl" />
+        <property name="contentType" value="text/html;charset=utf-8" />
+        <property name="requestContextAttribute" value="rc"/>
+        <property name="exposeRequestAttributes" value="true" />
+        <property name="exposeSessionAttributes" value="true" />
+        <property name="exposeSpringMacroHelpers" value="true" />
     </bean>
 
     <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
