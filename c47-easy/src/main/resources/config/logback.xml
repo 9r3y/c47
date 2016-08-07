@@ -117,7 +117,7 @@
     </appender>
 
     <root level="DEBUG">
-        <!--<appender-ref ref="console.debug" />-->
+        <appender-ref ref="console.debug" />
         <appender-ref ref="console.info" />
         <appender-ref ref="console.warn"/>
         <appender-ref ref="console.error"/>

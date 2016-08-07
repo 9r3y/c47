@@ -3,42 +3,45 @@
 <b:beans xmlns="http://www.springframework.org/schema/security"
     xmlns:b="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
-						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <http access-decision-manager-ref="accessDecisionManager">
+    <http>
         <csrf disabled="true" />
         <intercept-url pattern="/login*" access="permitAll" />
-        <intercept-url pattern="/admin/**/*" access="ROLE_ADMIN,AUTHENTICATED" />
-        <intercept-url pattern="/resources/**" access="permitAll" />
-        <intercept-url pattern="/**" access="authenticated" />
+        <intercept-url pattern="/resources/**/*" access="permitAll" />
+        <intercept-url pattern="/admin/**/*" access="ROLE_ADMIN" />
+        <intercept-url pattern="/" access="authenticated" />
         <form-login login-page="/login" />
         <remember-me />
-        <logout logout-url="/logout" />
+        <logout logout-url="/logout"/>
     </http>
 
+<!--    <http>
+        <intercept-url pattern="/api/**/*" access="authenticated" />
+        <http-basic />
+        <custom-filter ref="digestFilter" before="BASIC_AUTH_FILTER"/>
+    </http>-->
+
+    <user-service id="userService">
+        <user name="admin" password="admin" authorities="ROLE_USER,ROLE_ADMIN" />
+        <user name="user" password="user" authorities="ROLE_USER" />
+    </user-service>
+
     <authentication-manager>
-        <authentication-provider>
-            <user-service>
-                <user name="admin" password="admin" authorities="ROLE_ADMIN" />
-                <user name="user" password="user" authorities="ROLE_USER" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="car" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="mon" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="bea" password="scarvarez" />
-                <user authorities="ROLE_SCARVAREZ_MEMBER" name="andr" password="scarvarez" />
-            </user-service>
-        </authentication-provider>
+        <authentication-provider user-service-ref="userService" />
     </authentication-manager>
 
-    <b:bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
-        <b:constructor-arg>
-            <util:list>
-                <b:bean class="org.springframework.security.access.vote.RoleVoter"/>
-                <b:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
-            </util:list>
-        </b:constructor-arg>
+    <b:bean id="digestFilter" class=
+        "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+        <b:property name="userDetailsService" ref="userService" />
+        <b:property name="authenticationEntryPoint" ref="digestEntryPoint" />
     </b:bean>
+    <b:bean id="digestEntryPoint" class=
+        "org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+        <b:property name="realmName" value="terrormovies-realm" />
+        <b:property name="key" value="terrorific" />
+    </b:bean>
+
 
 </b:beans>

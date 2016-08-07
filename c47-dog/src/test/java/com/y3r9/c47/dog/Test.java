@@ -2,14 +2,18 @@ package com.y3r9.c47.dog;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -39,15 +43,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.Timer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -59,9 +68,13 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
+import com.example.tutorial.AddressBookProtos;
+import com.ibm.as400.access.AS400Text;
+import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
 import com.y3r9.c47.dog.util.JsonUtils;
 
 import redis.clients.jedis.Jedis;
@@ -69,13 +82,47 @@ import redis.clients.jedis.Jedis;
 public class Test {
 
 
-    public static void main(String[] args) throws IOException, CloneNotSupportedException, XMLStreamException {
-//        System.out.println(new Date(TimeUnit.NANOSECONDS.toMillis(1462431601000000000L)));
-//        Jedis jedis = new Jedis("172.16.101.229");
-//        System.out.println(jedis.get("foo"));
+    public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
+//        String hex = "0e54aa4d9b59f758cf50485bcf58c3556c4e470f";
+        String hex = "f0f0f0f0f0f0f2f2f5f8f4c9";
+        byte[] data = Hex.decodeHex(hex.toCharArray());
+        AS400Text text = new AS400Text(data.length, 1388);
+//        AS400Text text = new AS400Text(data.length);
+        System.out.println(text.toObject(data));
+        System.out.println(text.toObject(data));
+    }
 
+    public static byte[] decompress(final Inflater infater, final byte[] data) {
+        byte[] output = new byte[0];
 
+//        final Inflater decompresser = new Inflater();
+//        decompresser.reset();
+        infater.setInput(data);
 
+        final ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);
+        try {
+            final byte[] buf = new byte[1024];
+            while (!infater.finished()) {
+                final int i = infater.inflate(buf);
+                if (i == 0) {
+                    if (infater.needsInput()) {
+                        break;
+                    }
+                }
+                o.write(buf, 0, i);
+            }
+            output = o.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                o.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//        decompresser.end();
+        return output;
     }
 
     private void testWatchFolder() throws IOException {

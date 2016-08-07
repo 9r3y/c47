@@ -1,4 +1,4 @@
-package com.y3r9.c47.easy.main.config;
+package com.y3r9.c47.easy.config;
 
 import javax.servlet.Filter;
 
@@ -6,7 +6,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import com.y3r9.c47.easy.config.SecurityConfig;
+import com.y3r9.c47.easy.api.config.ApiConfig;
+import com.y3r9.c47.easy.main.config.MainConfig;
 
 /**
  * The class WebAppInitializer.
@@ -17,14 +18,13 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
     @Override
     protected Class<?>[] getRootConfigClasses() {
         return new Class[] {
-                SecurityConfig.class
         };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class[] {
-                MvcConfig.class
+                MainConfig.class, ApiConfig.class, SecurityConfig.class
         };
     }
 

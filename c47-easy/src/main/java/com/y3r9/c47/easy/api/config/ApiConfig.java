@@ -1,4 +1,4 @@
-package com.y3r9.c47.easy.main.config;
+package com.y3r9.c47.easy.api.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ImportResource;
  */
 @Configuration
 @ImportResource({
-        "classpath:config/spring/main-context.xml"
+        "classpath:config/spring/api-context.xml"
 })
-public class MvcConfig {
+public class ApiConfig {
 }
