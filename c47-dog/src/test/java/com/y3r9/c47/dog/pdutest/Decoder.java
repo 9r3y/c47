@@ -7,13 +7,15 @@ package com.y3r9.c47.dog.pdutest;
  */
 final class Decoder {
 
-    static int PDU_LEN = 100;
+    static int MTU = 1500;
+
+    static int PDU_PKT_COUNT = 3;
 
     boolean decode(Buf buf) {
-        if (buf.remaining() == PDU_LEN) {
-            while (buf.hasRemaining()) {
-                buf.getByte();
-            }
+        if (buf.remaining() == PDU_PKT_COUNT * MTU) {
+//            while (buf.hasRemaining()) {
+//                byte b = buf.getByte();
+//            }
             return true;
         }
         return false;

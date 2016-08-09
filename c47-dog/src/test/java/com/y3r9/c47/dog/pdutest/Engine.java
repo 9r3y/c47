@@ -15,11 +15,11 @@ import static org.junit.Assert.assertTrue;
  */
 public final class Engine {
 
-    static long PDU_COUNT = 100000000;
+    static long PDU_COUNT = 1000000;
 
     @Test
     public void run() {
-        ByteBuffer bb = ByteBuffer.allocate(Decoder.PDU_LEN / 10);
+        ByteBuffer bb = ByteBuffer.allocate(Decoder.MTU);
         Buf pktBuf = new SingleBuf(bb);
 
         CompositePduBuilder pduBuilder = new CompositePduBuilder();
@@ -33,7 +33,8 @@ public final class Engine {
     }
 
     public void doRun(Buf pktBuf, PduBuilder pduBuilder, Decoder decoder) {
-        for (long i = 0; i < PDU_COUNT; i++) {
+        long pktCount = PDU_COUNT * Decoder.PDU_PKT_COUNT;
+        for (long i = 0; i < pktCount; i++) {
             pktBuf.position(0);
             Buf buf = pduBuilder.build(pktBuf);
             if (decoder.decode(buf.duplicate())) {
