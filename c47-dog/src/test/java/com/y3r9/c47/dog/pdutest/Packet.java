@@ -9,7 +9,5 @@ import java.nio.ByteBuffer;
  */
 final class Packet {
 
-    private long seqNum;
-
-    private ByteBuffer buf;
+    Buf buf;
 }

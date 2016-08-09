@@ -72,7 +72,6 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
-import com.example.tutorial.AddressBookProtos;
 import com.ibm.as400.access.AS400Text;
 import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
 import com.y3r9.c47.dog.util.JsonUtils;

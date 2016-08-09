@@ -1,27 +1,13 @@
 package com.y3r9.c47.dog.pdutest;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 /**
- * The class PduBuilder.
+ * The interface PduBuilder.
  *
  * @version 1.0
  */
-final class PduBuilder {
+interface PduBuilder {
 
-    private static List<Segment> segments;
+    Buf build(Buf buf);
 
-    public Buf incomePacket(final Packet pkt) {
-
-        return null;
-    }
-
-    private static final class Segment {
-
-        private int seqNum;
-
-        private Buf buf;
-
-    }
+    void clear();
 }

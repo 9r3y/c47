@@ -9,6 +9,8 @@ interface Buf {
 
     byte getByte();
 
+    void putByte(byte b);
+
     byte getByte(int position);
 
     int position();
@@ -18,4 +20,8 @@ interface Buf {
     int remaining();
 
     boolean hasRemaining();
+
+    Buf duplicate();
+
+    void flip();
 }
