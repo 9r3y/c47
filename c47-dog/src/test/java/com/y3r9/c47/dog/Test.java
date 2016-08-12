@@ -17,13 +17,17 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -82,13 +86,27 @@ public class Test {
 
 
     public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
-//        String hex = "0e54aa4d9b59f758cf50485bcf58c3556c4e470f";
-        String hex = "f0f0f0f0f0f0f2f2f5f8f4c9";
-        byte[] data = Hex.decodeHex(hex.toCharArray());
-        AS400Text text = new AS400Text(data.length, 1388);
-//        AS400Text text = new AS400Text(data.length);
-        System.out.println(text.toObject(data));
-        System.out.println(text.toObject(data));
+        String str = "3.44E3";
+        double d = Double.parseDouble(str);
+        System.out.println(d);
+//        final byte[] b = Hex.decodeHex("0e5c4a5b6a0ff1f27af0f67af3f00e5b9e4a430f0e4ae55b7b50485c4a5b6b0f".toCharArray());
+//        AS400Text te = new AS400Text(b.length, 1388);
+//        System.out.println(te.toObject(b));
+//        final AtomicInteger c = new AtomicInteger(0);
+//        Files.walkFileTree(Paths.get("D:\\APP\\netis\\dcd\\dcd-parser\\src\\main\\xdl"), new SimpleFileVisitor<Path>() {
+//            @Override
+//            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+//                if (Files.isDirectory(file)) {
+//                    return FileVisitResult.CONTINUE;
+//                }
+//                if ("register.xml".equals(file.getFileName().toString())) {
+//                    return FileVisitResult.CONTINUE;
+//                }
+//                c.incrementAndGet();
+//                return FileVisitResult.CONTINUE;
+//            }
+//        });
+//        System.out.println(c);
     }
 
     public static byte[] decompress(final Inflater infater, final byte[] data) {

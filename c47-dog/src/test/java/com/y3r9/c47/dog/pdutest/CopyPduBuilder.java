@@ -10,22 +10,19 @@ import java.util.List;
  */
 final class CopyPduBuilder implements PduBuilder {
 
-    private Buf pdu;
+    private SingleBuf pdu;
 
     @Override
     public Buf build(final Buf buf) {
+        SingleBuf sBuf = (SingleBuf) buf;
         if (pdu == null) {
-            pdu = buf;
+            pdu = sBuf;
         } else {
-            Buf newPdu = SingleBuf.allocate(pdu.remaining() + buf.remaining());
-            while (pdu.hasRemaining()) {
-                newPdu.putByte(pdu.getByte());
-            }
-            while (buf.hasRemaining()) {
-                newPdu.putByte(buf.getByte());
-            }
+            SingleBuf newPdu = SingleBuf.allocate(pdu.remaining() + buf.remaining());
+            newPdu.put(pdu);
+            newPdu.put(sBuf);
             newPdu.flip();
-            pdu = newPdu;
+            pdu = sBuf;
         }
         return pdu;
     }

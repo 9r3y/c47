@@ -9,7 +9,7 @@ final class Decoder {
 
     static int MTU = 1500;
 
-    static int PDU_PKT_COUNT = 3;
+    static int PDU_PKT_COUNT = 10;
 
     boolean decode(Buf buf) {
         if (buf.remaining() == PDU_PKT_COUNT * MTU) {

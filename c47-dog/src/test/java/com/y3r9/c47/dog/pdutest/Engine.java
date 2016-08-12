@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
  */
 public final class Engine {
 
-    static long PDU_COUNT = 1000000;
+    static long PDU_COUNT = 100000000;
 
     @Test
     public void run() {

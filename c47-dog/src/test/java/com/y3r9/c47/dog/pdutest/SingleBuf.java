@@ -22,6 +22,14 @@ final class SingleBuf implements Buf {
         position++;
     }
 
+    public void put(final SingleBuf src) {
+        SingleBuf srcBuf = (SingleBuf) src;
+        int srcOrigPos = srcBuf.position();
+        position += src.remaining();
+        buf.put(srcBuf.buf);
+        srcBuf.position(srcOrigPos);
+    }
+
     @Override
     public byte getByte(final int position) {
         return buf.get(position);
@@ -64,7 +72,7 @@ final class SingleBuf implements Buf {
         this.limit = buf.remaining();
     }
 
-    public static Buf allocate(final int size) {
+    public static SingleBuf allocate(final int size) {
         ByteBuffer bb = ByteBuffer.allocate(size);
         return new SingleBuf(bb);
     }

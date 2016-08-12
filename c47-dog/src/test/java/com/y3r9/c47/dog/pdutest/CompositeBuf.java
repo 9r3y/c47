@@ -1,8 +1,5 @@
 package com.y3r9.c47.dog.pdutest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * The class CompositeByteBuffer.
  *
@@ -12,18 +9,12 @@ final class CompositeBuf implements Buf {
 
     @Override
     public byte getByte() {
-        int index = currentIndex;
-        Component comp;
-        for (;;) {
-            comp = components.get(index);
-            if (position >= comp.endOffset) {
-                index++;
-            } else {
-                break;
-            }
+        Component comp = currentComp;
+        while (position >= comp.endOffset) {
+            comp = comp.next;
         }
-        currentIndex = index;
         byte result = comp.buf.getByte(position - comp.offset);
+        currentComp = comp;
         position++;
         return result;
     }
@@ -35,11 +26,14 @@ final class CompositeBuf implements Buf {
 
     @Override
     public byte getByte(final int position) {
-        Component comp = components.get(currentIndex);
+        Component comp = currentComp;
         if (position >= comp.offset && position < comp.endOffset) {
             comp = findComponent(position);
         }
-        return comp.buf.getByte(position - comp.offset);
+        byte result = comp.buf.getByte(position - comp.offset);
+        currentComp = comp;
+        this.position++;
+        return result;
     }
 
     @Override
@@ -49,20 +43,19 @@ final class CompositeBuf implements Buf {
 
     @Override
     public void position(final int position) {
+        Component comp = currentComp;
+        if (position < comp.offset || position > comp.endOffset) {
+            // TODO Find with two direction.
+            comp = findComponent(position);
+            currentComp = comp;
+        }
         this.position = position;
     }
 
     private Component findComponent(final int position) {
-        for (int low = 0, high = components.size(); low <= high;) {
-            int mid = low + high >>> 1;
-            Component c = components.get(mid);
-            if (position >= c.endOffset) {
-                low = mid + 1;
-            } else if (position < c.offset) {
-                high = mid - 1;
-            } else {
-                assert c.length != 0;
-                return c;
+        for (Component comp = headComp; comp != null; comp = comp.next) {
+            if (position >= comp.offset && position <= comp.endOffset) {
+                return comp;
             }
         }
         throw new IllegalArgumentException();
@@ -81,8 +74,8 @@ final class CompositeBuf implements Buf {
     @Override
     public Buf duplicate() {
         CompositeBuf result = new CompositeBuf();
-        result.components = components;
-        result.currentIndex = currentIndex;
+        result.headComp = headComp;
+        result.currentComp = currentComp;
         result.position = position;
         result.limit = limit;
         return result;
@@ -102,6 +95,8 @@ final class CompositeBuf implements Buf {
 
         final int length;
 
+        Component next;
+
         Component(Buf buf, int offset) {
             this.buf = buf;
             this.offset = offset;
@@ -113,43 +108,45 @@ final class CompositeBuf implements Buf {
 
     public void addComponent(Buf buf) {
         limit += buf.remaining();
-        Component last = null;
-        for (Component comp : components) {
-            last = comp;
-        }
-        if (last == null) {
-            Component comp = new Component(buf, 0);
-            components.add(comp);
-            currentIndex = 0;
+        if (headComp == null) {
+            headComp = new Component(buf, 0);
+            currentComp = headComp;
         } else {
-            Component comp = new Component(buf, last.endOffset);
-            components.add(comp);
+            Component last = headComp;
+            while (last.next != null) {
+                last = last.next;
+            }
+            last.next = new Component(buf, last.endOffset);
         }
     }
 
     public CompositeBuf(final Buf ... bufs) {
+        Component last = null;
         int offset = 0;
         for (Buf buf : bufs) {
             limit += buf.remaining();
             Component comp = new Component(buf, offset);
-            components.add(comp);
+            if (last == null) {
+                headComp = comp;
+                currentComp = comp;
+            } else {
+                last.next = comp;
+            }
+            last = comp;
             offset += buf.remaining();
-        }
-        if (components.size() == 1) {
-            currentIndex = 0;
         }
     }
 
     public void clear() {
-        components.clear();
-        currentIndex = 0;
+        headComp = null;
+        currentComp = null;
         position = 0;
         limit = 0;
     }
 
-    private List<Component> components = new ArrayList<>();
+    private Component headComp;
 
-    private int currentIndex;
+    private Component currentComp;
 
     private int position;
 
