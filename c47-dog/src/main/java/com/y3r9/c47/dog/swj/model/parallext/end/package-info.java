@@ -1,0 +1,8 @@
+/**
+ * Netis java utility model parallel extension end package.
+ * 
+ * @version 1.0
+ * @since project 3.0
+ */
+package com.y3r9.c47.dog.swj.model.parallext.end;
+
