@@ -124,6 +124,11 @@
     </build>
     
     <dependencies>
+        <dependency>
+            <groupId>com.y3r9.c47</groupId>
+            <artifactId>c47-annot</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     	<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

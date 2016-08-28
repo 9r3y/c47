@@ -11,6 +11,7 @@
     <name>c47-root</name>
 
     <modules>
+        <module>c47-annot</module>
         <module>c47-dog</module>
         <module>c47-easy</module>
         <module>zmqsvr</module>
