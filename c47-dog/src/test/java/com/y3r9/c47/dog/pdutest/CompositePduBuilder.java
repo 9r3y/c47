@@ -7,6 +7,7 @@ package com.y3r9.c47.dog.pdutest;
  */
 final class CompositePduBuilder implements PduBuilder {
 
+    /** The Pdu. */
     private CompositeBuf pdu = new CompositeBuf();
 
     @Override

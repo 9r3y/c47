@@ -11,75 +11,97 @@ final class SingleBuf implements Buf {
 
     @Override
     public byte getByte() {
-        byte result = buf.get(position);
-        position++;
-        return result;
+        return buf.get();
     }
 
     @Override
     public void putByte(byte b) {
         buf.put(b);
-        position++;
     }
 
+    /**
+     * Put.
+     *
+     * @param src the src
+     */
     public void put(final SingleBuf src) {
-        SingleBuf srcBuf = (SingleBuf) src;
-        int srcOrigPos = srcBuf.position();
-        position += src.remaining();
-        buf.put(srcBuf.buf);
-        srcBuf.position(srcOrigPos);
+        buf.put(src.buf);
     }
 
     @Override
     public byte getByte(final int position) {
-        return buf.get(position);
+        return buf.get(position - offset);
     }
 
     @Override
     public int position() {
-        return position;
+        return buf.position() - offset;
     }
 
     @Override
     public void position(final int position) {
-        this.position = position;
+        buf.position(offset + position);
+    }
+
+    @Override
+    public int limit() {
+        return buf.limit() - offset;
+    }
+
+    @Override
+    public void limit(final int position) {
+        buf.limit(offset + position);
     }
 
     @Override
     public int remaining() {
-        return limit - position;
+        return buf.remaining();
     }
 
     @Override
     public boolean hasRemaining() {
-        return position < limit;
+        return buf.hasRemaining();
     }
 
     @Override
-    public Buf duplicate() {
-        return new SingleBuf(buf);
+    public SingleBuf duplicate() {
+        final ByteBuffer newBuf = buf.duplicate();
+        newBuf.position(offset);
+        final SingleBuf result = new SingleBuf(newBuf);
+        newBuf.position(buf.position());
+        return result;
     }
 
     @Override
     public void flip() {
-        buf.flip();
-        limit = position;
-        position = 0;
+        buf.limit(buf.position());
+        buf.position(offset);
     }
 
+    /**
+     * Instantiates a new Single buf.
+     *
+     * @param buf the buf
+     */
     public SingleBuf(final ByteBuffer buf) {
         this.buf = buf;
-        this.limit = buf.remaining();
+        offset = buf.position();
     }
 
+    /**
+     * Allocate single buf.
+     *
+     * @param size the size
+     * @return the single buf
+     */
     public static SingleBuf allocate(final int size) {
         ByteBuffer bb = ByteBuffer.allocate(size);
         return new SingleBuf(bb);
     }
 
+    /** The Buf. */
     private final ByteBuffer buf;
 
-    private int position;
+    private final int offset;
 
-    private int limit;
 }

@@ -20,10 +20,13 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.RecursiveAction;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import com.sun.org.apache.regexp.internal.RE;
 import com.y3r9.c47.dog.IpText;
+
+import scala.Int;
 
 /**
  * The class Scripts.
@@ -33,7 +36,88 @@ import com.y3r9.c47.dog.IpText;
 public class Scripts {
 
     @Test
-    public void test1() throws IOException {
+    public void spvsyn() throws IOException {
+//        Path nts = Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\nts\\eth2\\20160815\\2016081517\\20160815171800_0@1m.nts");
+//        Path nta = Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\nta\\eth2\\20160815\\2016081517\\1m\\20160815171800_0.nta");
+        Path nts = Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\default_0_20160826153000.nts");
+        List<String> lines = Files.readAllLines(nts);
+
+        class Sum {
+            private int synSum;
+            private int attachSuccSum;
+            private int attachFailSum;
+            @Override
+            public String toString() {
+                final StringBuilder sb = new StringBuilder("Sum{");
+                sb.append("synSum=").append(synSum);
+                sb.append(", attachSuccSum=").append(attachSuccSum);
+                sb.append(", attachFailSum=").append(attachFailSum);
+                sb.append('}');
+                return sb.toString();
+            }
+        }
+        Sum[] sums = new Sum[]{new Sum(), new Sum()};
+        int ln = 1;
+        for (String line : lines) {
+            final String[] kvs = line.split("\t");
+            final Map<String, String> map = new HashMap<>();
+            for (String kv : kvs) {
+                if (!kv.contains("=")) {
+                    map.put("ts", kv);
+                    continue;
+                }
+                String[] k_v = kv.split("=");
+                if (k_v.length > 1) {
+                    map.put(k_v[0], k_v[1]);
+                }
+            }
+            final String spvdir = map.get("SpvDir");
+            if (StringUtils.isNotEmpty(spvdir)) {
+                int dir = Integer.parseInt(spvdir);
+                Sum sum = sums[dir];
+                String value;
+                int oldAttachSuccSum = sum.attachSuccSum;
+                int oldAttachFailSum = sum.attachFailSum;
+
+                value = map.get("Syn");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.synSum += Integer.parseInt(value);
+                }
+                value = map.get("AttachSucc");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.attachSuccSum += Integer.parseInt(value);
+                }
+                value = map.get("AttachFail");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.attachFailSum += Integer.parseInt(value);
+                }
+/*                value = map.get("Syn_Sum");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.synSum += Integer.parseInt(value);
+                }
+                value = map.get("AttachSucc_Sum");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.attachSuccSum += Integer.parseInt(value);
+                }
+                value = map.get("AttachFail_Sum");
+                if (StringUtils.isNotEmpty(value)) {
+                    sum.attachFailSum += Integer.parseInt(value);
+                }*/
+//                if (sum.attachSuccSum != sum.synSum) {
+//                    System.out.println(dir + " " + ln);// 194
+//                }
+                if (dir == 0 && sum.attachFailSum > oldAttachFailSum) {
+                    System.out.println(dir + " " + ln);// 873
+                }
+            }
+            ln++;
+        }
+        System.out.println(sums[0]);
+        System.out.println(sums[1]);
+    }
+
+    @Test
+    public void compareConn() throws IOException {
         List<Path> ntss = new ArrayList<>();
         ntss.add(Paths.get("D:\\e\\loadnts2\\20160705120000_0@1m.nts"));
 //        ntss.add(Paths.get("D:\\e\\loadnts2\\20160706T105652F692694Rixo\\20160705120000_0.nts"));
@@ -380,7 +464,8 @@ public class Scripts {
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155500.ntr"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.ntr"));
 
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.ntr"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.ntr"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\shao.nts"));
         for (Path path : paths) {
             try {
                 List<String> lines = Files.readAllLines(path);
@@ -418,7 +503,10 @@ public class Scripts {
 
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155500.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160526171900_0.nta"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160526171900_0.nta"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\20160822110000_0.nta"));
+//        paths.add(Paths.get("D:\\e\\shao\\20160822110000_0.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\shao.nta"));
 
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160511173100_0.ipfix.nta"));
@@ -437,18 +525,18 @@ public class Scripts {
                     final Map<String, String> map = new HashMap<>();
                     for (String kv : kvs) {
                         if (!kv.contains("=")) {
-                            map.put("ts", kv.substring(1, 20));
+//                            map.put("ts", kv.substring(1, 20));
                             continue;
                         }
                         String[] k_v = kv.split("=");
                         map.put(k_v[0], k_v[1].trim());
                     }
                     String str;
-                    str = map.get("ts");
-                    if (str == null) {
-                        continue;
-                    }
-                    long ts = tsSdf.parse(str).getTime();
+//                    str = map.get("ts");
+//                    if (str == null) {
+//                        continue;
+//                    }
+//                    long ts = tsSdf.parse(str).getTime();
 
 //                    if (ts < leftTs || ts >= rightTs) {
 //                        continue;
@@ -468,7 +556,7 @@ public class Scripts {
 //                        continue;
 //                    }
 
-                    sum.setTs(ts);
+//                    sum.setTs(ts);
                     str = map.get("PktCnt_Sum");
                     if (str != null) {
                         final long num = Long.parseLong(str);

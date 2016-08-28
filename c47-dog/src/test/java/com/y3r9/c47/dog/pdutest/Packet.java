@@ -1,7 +1,5 @@
 package com.y3r9.c47.dog.pdutest;
 
-import java.nio.ByteBuffer;
-
 /**
  * The class Packet.
  *
@@ -9,5 +7,6 @@ import java.nio.ByteBuffer;
  */
 final class Packet {
 
+    /** The Buf. */
     Buf buf;
 }

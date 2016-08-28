@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -86,9 +87,6 @@ public class Test {
 
 
     public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
-        String str = "3.44E3";
-        double d = Double.parseDouble(str);
-        System.out.println(d);
 //        final byte[] b = Hex.decodeHex("0e5c4a5b6a0ff1f27af0f67af3f00e5b9e4a430f0e4ae55b7b50485c4a5b6b0f".toCharArray());
 //        AS400Text te = new AS400Text(b.length, 1388);
 //        System.out.println(te.toObject(b));

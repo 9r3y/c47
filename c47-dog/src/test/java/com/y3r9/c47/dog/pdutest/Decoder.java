@@ -7,18 +7,29 @@ package com.y3r9.c47.dog.pdutest;
  */
 final class Decoder {
 
-    static int MTU = 1500;
-
-    static int PDU_PKT_COUNT = 10;
-
+    /**
+     * Decode boolean.
+     *
+     * @param buf the buf
+     * @return the boolean
+     */
     boolean decode(Buf buf) {
-        if (buf.remaining() == PDU_PKT_COUNT * MTU) {
-//            while (buf.hasRemaining()) {
-//                byte b = buf.getByte();
-//            }
+        final int remain = buf.remaining();
+        if (remain == pduLen) {
             return true;
         }
         return false;
     }
 
+    /**
+     * Instantiates a new Decoder.
+     *
+     * @param pduLen the pdu len
+     */
+    public Decoder(final int pduLen) {
+        this.pduLen = pduLen;
+    }
+
+    /** The Pdu len. */
+    private final int pduLen;
 }

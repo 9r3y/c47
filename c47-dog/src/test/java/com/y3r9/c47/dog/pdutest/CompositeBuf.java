@@ -45,13 +45,28 @@ final class CompositeBuf implements Buf {
     public void position(final int position) {
         Component comp = currentComp;
         if (position < comp.offset || position > comp.endOffset) {
-            // TODO Find with two direction.
             comp = findComponent(position);
             currentComp = comp;
         }
         this.position = position;
     }
 
+    @Override
+    public int limit() {
+        return limit;
+    }
+
+    @Override
+    public void limit(final int position) {
+        limit = position;
+    }
+
+    /**
+     * Find component component.
+     *
+     * @param position the position
+     * @return the component
+     */
     private Component findComponent(final int position) {
         for (Component comp = headComp; comp != null; comp = comp.next) {
             if (position >= comp.offset && position <= comp.endOffset) {
@@ -86,17 +101,33 @@ final class CompositeBuf implements Buf {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * The type Component.
+     *
+     * @version 1.0
+     */
     private static final class Component {
+        /** The Buf. */
         final Buf buf;
 
+        /** The Offset. */
         final int offset;
 
+        /** The End offset. */
         final int endOffset;
 
+        /** The Length. */
         final int length;
 
+        /** The Next. */
         Component next;
 
+        /**
+         * Instantiates a new Component.
+         *
+         * @param buf the buf
+         * @param offset the offset
+         */
         Component(Buf buf, int offset) {
             this.buf = buf;
             this.offset = offset;
@@ -106,6 +137,11 @@ final class CompositeBuf implements Buf {
 
     }
 
+    /**
+     * Add component.
+     *
+     * @param buf the buf
+     */
     public void addComponent(Buf buf) {
         limit += buf.remaining();
         if (headComp == null) {
@@ -120,6 +156,11 @@ final class CompositeBuf implements Buf {
         }
     }
 
+    /**
+     * Instantiates a new Composite buf.
+     *
+     * @param bufs the bufs
+     */
     public CompositeBuf(final Buf ... bufs) {
         Component last = null;
         int offset = 0;
@@ -137,6 +178,9 @@ final class CompositeBuf implements Buf {
         }
     }
 
+    /**
+     * Clear.
+     */
     public void clear() {
         headComp = null;
         currentComp = null;
@@ -144,11 +188,15 @@ final class CompositeBuf implements Buf {
         limit = 0;
     }
 
+    /** The Head comp. */
     private Component headComp;
 
+    /** The Current comp. */
     private Component currentComp;
 
+    /** The Position. */
     private int position;
 
+    /** The Limit. */
     private int limit;
 }
