@@ -37,6 +37,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,6 +88,8 @@ public class Test {
 
 
     public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
+        long l = 2l * 1024l * 1024l * 1024l;
+        System.out.println(l / 1000d);
 //        final byte[] b = Hex.decodeHex("0e5c4a5b6a0ff1f27af0f67af3f00e5b9e4a430f0e4ae55b7b50485c4a5b6b0f".toCharArray());
 //        AS400Text te = new AS400Text(b.length, 1388);
 //        System.out.println(te.toObject(b));

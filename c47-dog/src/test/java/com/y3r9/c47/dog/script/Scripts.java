@@ -189,6 +189,60 @@ public class Scripts {
     }
 
     @Test
+    public void calcNtaConn() throws IOException {
+        List<Path> ntaFiles = new ArrayList<>();
+        ntaFiles.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\ATest\\GRE_TCP.nta"));
+        Map<NtaRecord, NtaRecord> ntaMap = new HashMap<>();
+        for (Path ntaFile : ntaFiles) {
+            List<String> lines = Files.readAllLines(ntaFile);
+            int i = 1;
+            for (String line : lines) {
+                final String[] kvs = line.split("\t");
+                final Map<String, String> map = new HashMap<>();
+                for (String kv : kvs) {
+                    if (!kv.contains("=")) {
+                        map.put("ts", kv);
+                        continue;
+                    }
+                    String[] k_v = kv.split("=");
+                    map.put(k_v[0], k_v[1]);
+                }
+                NtaRecord nta = new NtaRecord();
+                nta.setSrcIp(getInt(map, "SrcIp"));
+                nta.setDestIp(getInt(map, "DestIp"));
+                nta.setSrcPort(getInt(map, "SrcPort"));
+                nta.setDestPort(getInt(map, "DestPort"));
+                nta.setFlowSide(getInt(map, "FlowSide"));
+                nta.setConnCount(getInt(map, "ConnCount60s"));
+                nta.setPath(ntaFile);
+                nta.setLine(i++);
+
+                NtaRecord exsist = ntaMap.get(nta);
+                if (exsist == null) {
+                    ntaMap.put(nta, nta);
+                } else {
+                    exsist.merge(nta);
+                }
+            }
+        }
+        int connSum = 0;
+        for (NtaRecord nta : ntaMap.values()) {
+            if (nta.getFlowSide() == 0) {
+                connSum += nta.getConnCount();
+            }
+        }
+        System.out.println(connSum);
+    }
+
+    private int getInt(final Map<String, String> map, final String key) {
+        String str = map.get(key);
+        if (StringUtils.isNotEmpty(str)) {
+            return Integer.parseInt(str);
+        }
+        return 0;
+    }
+
+    @Test
     public void dumpNetFlowData() {
         List<Path> paths = new ArrayList<>();
         paths.add(Paths.get("D:\\e\\nflow\\v9\\nflow9_1503.pcap"));
