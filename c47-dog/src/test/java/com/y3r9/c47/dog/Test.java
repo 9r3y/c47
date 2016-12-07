@@ -40,17 +40,24 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
@@ -77,37 +84,180 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.HexDump;
+import org.apache.commons.net.ntp.TimeStamp;
 
+import com.google.common.collect.MinMaxPriorityQueue;
 import com.ibm.as400.access.AS400Text;
 import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
+import com.y3r9.c47.dog.swj.model.collection.BoundedPriorityQueue;
+import com.y3r9.c47.dog.swj.value.Power2Utils;
 import com.y3r9.c47.dog.util.JsonUtils;
 
+import cn.com.netis.dp.commons.common.packet.FlowSide;
 import redis.clients.jedis.Jedis;
+import scala.tools.nsc.Global;
+import tachyon.util.io.FileUtils;
 
 public class Test {
 
+    static class El {
+        @Override
+        public int hashCode() {
+            return -324534;
+        }
+    }
 
     public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
-        long l = 2l * 1024l * 1024l * 1024l;
-        System.out.println(l / 1000d);
-//        final byte[] b = Hex.decodeHex("0e5c4a5b6a0ff1f27af0f67af3f00e5b9e4a430f0e4ae55b7b50485c4a5b6b0f".toCharArray());
-//        AS400Text te = new AS400Text(b.length, 1388);
-//        System.out.println(te.toObject(b));
-//        final AtomicInteger c = new AtomicInteger(0);
-//        Files.walkFileTree(Paths.get("D:\\APP\\netis\\dcd\\dcd-parser\\src\\main\\xdl"), new SimpleFileVisitor<Path>() {
-//            @Override
-//            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-//                if (Files.isDirectory(file)) {
-//                    return FileVisitResult.CONTINUE;
-//                }
-//                if ("register.xml".equals(file.getFileName().toString())) {
-//                    return FileVisitResult.CONTINUE;
-//                }
-//                c.incrementAndGet();
-//                return FileVisitResult.CONTINUE;
-//            }
-//        });
-//        System.out.println(c);
+//        MinMaxPriorityQueue<Long> queue = MinMaxPriorityQueue.maximumSize(50).create();
+/*        BoundedPriorityQueue<Long> queue = new BoundedPriorityQueue<>(50, (o1, o2) -> {
+            return o1.compareTo(o2);
+        });
+        Random random = new Random();
+        final long[] data = new long[10000000];
+        for (int i = 0; i < 10000000; i++) {
+            data[i] = random.nextLong();
+        }
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < data.length; i++) {
+            queue.add(new Long(4));
+        }
+        System.out.println(System.currentTimeMillis() - start);
+        final StringBuilder sb = new StringBuilder(100);
+        long last = Long.MIN_VALUE;
+        while (true) {
+            Long l = queue.poll();
+            if (l == null) {
+                break;
+            } else if (l < last) {
+                throw new RuntimeException(l + " < " + last);
+            }
+            last = l;
+            sb.append(' ').append(l);
+        }
+        System.out.println(sb.toString());*/
+        Calendar cld = Calendar.getInstance();
+        cld.set(Calendar.SECOND, 0);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        Path monitor = Paths.get("D:/TMP/monitor");
+        for (int i = 0; i < 100; i++) {
+            cld.add(Calendar.MINUTE, 1);
+            final String fileName = sdf.format(cld.getTime()) + ".pcap";
+            FileUtils.createFile(monitor.resolve(fileName).toString());
+        }
+    }
+
+    public static void testDecompress() throws IOException {
+        byte[] data = org.bouncycastle.util.encoders.Hex.decode("0000054F00558FFA010000000000" +
+                "007E00000000000000E04040FF000F00" +
+                "F0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" +
+                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" +
+                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" +
+                "FFFFFFFFFFFFFFFFFFFFFFFF7F494D49" +
+                "582E312E30054F043300015472406465" +
+                "58416C6C004D5343406C6C5573657273" +
+                "0001569798FB8C0004490002CC41903A" +
+                "A7CA7400879B6E532B6805002ACA0A40" +
+                "5A700333373D32303136303831373034" +
+                "32303030303030310131313D33343934" +
+                "36323437313435303533313030330135" +
+                "343D310133313D302E30303030303030" +
+                "300131303038373D302E303030303030" +
+                "0135393D300139393D302E3030303030" +
+                "303030013135303D460133393D320135" +
+                "33373D310131303130353D3001313031" +
+                "37363D340131373D4342543230313630" +
+                "3831373030303030310131303031393D" +
+                "310131303331373D310134383D313230" +
+                "3230310132323D3130310134343D3939" +
+                "2E32323030303030300133323D313030" +
+                "30303030302E3030303030300136333D" +
+                "310137353D3230313630383137013630" +
+                "3D32303136303831372D31363A32333A" +
+                "32302E3339310131303331383D31363A" +
+                "32333A32302E333931013233323D3101" +
+                "3233333D5969656C6432013233343D34" +
+                "2E303039323438393331343334013931" +
+                "393D300135383D2D0131303032323D4E" +
+                "013435333D32013434383D3130303030" +
+                "30333131303030303030313031303031" +
+                "013435323D313139013830323D313001" +
+                "3532333D6C69756A6961303101383033" +
+                "3D32013532333DE58898E4BDB3013830" +
+                "333D313031013532333DE58898E4BDB3" +
+                "013830333D313236013532333D424348" +
+                "4F013830333D313235013532333DE4B8" +
+                "ADE59BBDE993B6E8A18C013830333D31" +
+                "3234013532333DE4B8ADE59BBDE993B6" +
+                "E8A18CE680BBE8A18C013830333D3131" +
+                "30013532333D31313034303033393301" +
+                "3830333D3135013532333D3001383033" +
+                "3D313233013532333D2D013830333D32" +
+                "3233013532333D413030303330303030" +
+                "3031013830333D313135013434383D31" +
+                "30303030303231313030303030303130" +
+                "31303031013435323D31323001383032" +
+                "3D39013532333D6C696E736875013830" +
+                "333D32013532333DE69E97E888920138" +
+                "30333D313031013532333DE69E97E888" +
+                "92013830333D313236013532333D4142" +
+                "4349013830333D313235013532333DE5" +
+                "869CE4B89AE993B6E8A18C013830333D" +
+                "313234013532333DE4B8ADE59BBDE586" +
+                "9CE4B89AE993B6E8A18CE8B584E98791" +
+                "E6B885E7AE97E4B8ADE5BF8301383033" +
+                "3D313130013532333D31313034303033" +
+                "3839013830333D3135013532333D3001" +
+                "3830" +
+                "333D313233013532333D4130" +
+                "303032303030303031013830333D3131" +
+                "350131303330303D30013135393D322E" +
+                "32353130393239300131303030323D32" +
+                "32353130392E32383936313701313033" +
+                "31323D393932323030302E3030303030" +
+                "300131303034383D3130312E34373130" +
+                "393239300136343D3230313630383137" +
+                "013131393D31303134373130392E3239" +
+                "303030300131303436333D3001313039" +
+                "36343D310131303D30393901");
+        ByteBuffer input = ByteBuffer.wrap(data);
+        ByteBuffer out = decompressTwoByte(input);
+        byte[] clear = new byte[out.remaining()];
+        out.get(clear);
+        HexDump.dump(clear, 0, System.out, 0);
+    }
+
+    /**
+     * Decompress two byte byte buffer.
+     *
+     * @param input the input
+     * @return the byte buffer
+     */
+    private static ByteBuffer decompressTwoByte(final ByteBuffer input) {
+        final int outSize = input.getInt();
+        final ByteBuffer result = ByteBuffer.allocate(outSize + 20);
+        final int bitStreamLen = UnsignedValue.toUshort(input.getShort());
+        final int bitStreamStartPos = input.position();
+        input.position(bitStreamStartPos + bitStreamLen);
+
+        final short empty = 0;
+        int i = 0;
+        for (int inCount = 0; inCount < bitStreamLen; inCount++) {
+            result.putShort((input.get(bitStreamStartPos + inCount) & 1) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 2) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 4) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 8) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 16) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 32) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 64) > 0 ? input.getShort() : empty);
+            result.putShort((input.get(bitStreamStartPos + inCount) & 128) > 0 ? input.getShort() : empty);
+        }
+
+        if ((outSize & 1) > 0) {
+            result.put(outSize - 1, input.get());
+        }
+        result.flip();
+        return result;
     }
 
     public static byte[] decompress(final Inflater infater, final byte[] data) {

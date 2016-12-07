@@ -46,12 +46,13 @@ final class ZmqMsgConsumer implements ZmqMsgConsumable {
                 final MessagePack messagePack = new MessagePack();
                 // skip header
                 final byte[] header = socket.recv(0);
-//                final ZmqHeader zmqHeader = processHeader(messagePack, header);
+                final ZmqHeader zmqHeader = processHeader(messagePack, header);
+                System.out.print(zmqHeader.toString());
 
                 // fetch body
                 final byte[] body = socket.recv(0);
                 final ZmqBody zmqBody = processBody(messagePack, body);
-                LOG.debug(zmqBody.getUnpackBody());
+                System.out.println(zmqBody.getUnpackBody());
 
 //                if (zmqBody.getStreamId() == null) {
 //                    //LOG.info(zmqBody.getUnpackBody());
@@ -340,6 +341,15 @@ final class ZmqMsgConsumer implements ZmqMsgConsumable {
         public void setTs(final long value) {
             ts = value;
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ZmqHeader{");
+            sb.append("ts=").append(ts);
+            sb.append(", routeId=").append(routeId);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     /**
@@ -410,6 +420,16 @@ final class ZmqMsgConsumer implements ZmqMsgConsumable {
          */
         public void setMetaType(final String value) {
             metaType = value;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ZmqBody{");
+            sb.append("streamId='").append(streamId).append('\'');
+            sb.append(", unpackBody='").append(unpackBody).append('\'');
+            sb.append(", metaType='").append(metaType).append('\'');
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

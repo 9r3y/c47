@@ -30,13 +30,14 @@ final class DebugSvr implements ZmqMsgConsumable {
                 final byte[] msg = socket.recv(0);
                 long ts = Long.valueOf(new String(msg).split(" ")[0]);
 
-                LOG.debug(String.valueOf(ts));
+//                LOG.debug(String.valueOf(ts));
+                System.out.write(msg, 0, msg.length);
                 if (ts < lastTs) {
                     System.exit(-1);
                 }
                 lastTs = ts;
 
-                Thread.sleep(300);
+//                Thread.sleep(300);
             }
         } catch (Exception e) {
             e.printStackTrace();

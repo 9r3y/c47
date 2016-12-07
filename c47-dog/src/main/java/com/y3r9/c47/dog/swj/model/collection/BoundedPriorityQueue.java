@@ -6,13 +6,14 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import cn.com.netis.dp.commons.lang.NonPositiveArgumentException;
+import cn.com.netis.dp.commons.lang.NullArgumentException;
 
 /**
  * A bounded priority queue to solve TopN problem. This implementation use red-black tree rather
- * than heap in PriorityQueue. Use Google Guava's MinMaxPriorityQueue should get a better performance.
+ * than heap. Use Google Guava's MinMaxPriorityQueue should get a better performance.
  *
  * @param <E> the type parameter
- * @version 1.0
+ * @version 1.1
  */
 public final class BoundedPriorityQueue<E> extends AbstractQueue<E> {
 
@@ -43,14 +44,7 @@ public final class BoundedPriorityQueue<E> extends AbstractQueue<E> {
             if (last == null) {
                 last = treeSet.last();
             }
-            int comp;
-            if (comparator != null) {
-                comp = comparator.compare(e, last);
-            } else {
-                @SuppressWarnings("unchecked")
-                final Comparable<? super E> key = (Comparable<? super E>) e;
-                comp = key.compareTo(last);
-            }
+            int comp = comparator.compare(e, last);
             if (comp < 0) {
                 treeSet.pollLast();
                 treeSet.add(e);
@@ -83,24 +77,14 @@ public final class BoundedPriorityQueue<E> extends AbstractQueue<E> {
      * Instantiates a new Bounded priority queue.
      *
      * @param capacity the capacity
-     */
-    public BoundedPriorityQueue(final int capacity) {
-        NonPositiveArgumentException.check(capacity, "capacity must be greater than 0");
-        this.capacity = capacity;
-        treeSet = new TreeSet<>();
-    }
-
-    /**
-     * Instantiates a new Bounded priority queue.
-     *
-     * @param capacity the capacity
      * @param comparator the comparator
      */
     public BoundedPriorityQueue(final int capacity, final Comparator<? super E> comparator) {
-        NonPositiveArgumentException.check(capacity, "capacity must be greater than 0");
-        this.comparator = comparator;
+        NonPositiveArgumentException.check(capacity, "Capacity must be greater than 0.");
+        NullArgumentException.check(comparator, "Comparator is required.");
+        this.comparator = new EnsureDiffComparator<>(comparator);
         this.capacity = capacity;
-        treeSet = new TreeSet<>(comparator);
+        treeSet = new TreeSet<>(this.comparator);
     }
 
     /** The Tree set. */
@@ -114,4 +98,23 @@ public final class BoundedPriorityQueue<E> extends AbstractQueue<E> {
 
     /** The last element while queue is full. */
     private E last;
+
+    private static final class EnsureDiffComparator<T> implements Comparator<T> {
+
+        @Override
+        public int compare(final T a, final T b) {
+            int result = innerComparator.compare(a, b);
+            if (result != 0) {
+                return result;
+            }
+            return System.identityHashCode(a) <= System.identityHashCode(b) ? -1 : 1;
+        }
+
+        public EnsureDiffComparator(final Comparator<? super T> comparator) {
+            innerComparator = comparator;
+        }
+
+        /** The Inner comparator. */
+        private final Comparator<? super T> innerComparator;
+    }
 }

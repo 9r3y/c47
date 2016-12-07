@@ -18,6 +18,7 @@ final class DebugClient implements Runnable {
     @Override
     public void run() {
         final ZMQ.Socket socket = zmqContext.socket(ZMQ.PUSH);
+        socket.setHWM(20000);
 //        socket.setSndHWM(1);
 //        socket.setSendBufferSize(1);
         socket.connect(endPoint);
@@ -27,7 +28,9 @@ final class DebugClient implements Runnable {
         final String a = StringUtils.repeat("a", 1000);
         int ts = 1;
         try {
-            while (!Thread.interrupted()) {
+            socket.send(new byte[]{1,1,3}, ZMQ.SNDMORE);
+            socket.send(new byte[]{1,1,3}, 0);
+/*            while (!Thread.interrupted()) {
                 for (int i = 0; i < 10; i++) {
                     byte[] msg = String.valueOf(ts + " " + a).getBytes();
                     socket.send(msg, 0);
@@ -35,15 +38,21 @@ final class DebugClient implements Runnable {
                     ts++;
                 }
                 Thread.sleep(1000);
-            }
+            }*/
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            socket.close();
+            zmqContext.term();
         }
         LOG.info("Finished.");
     }
 
     public static void main(String[] args) {
-        new Thread(new DebugClient(args[0])).start();
+//        new Thread(new DebugClient(args[0])).start();
+//        new Thread(new DebugClient("tcp://127.0.0.1:38000")).start();
+        new Thread(new DebugClient("tcp://172.16.14.112:38184")).start();
     }
 
     /**

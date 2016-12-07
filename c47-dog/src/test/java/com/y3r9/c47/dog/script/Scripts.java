@@ -4,9 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +38,44 @@ import scala.Int;
  * @version 1.0
  */
 public class Scripts {
+
+    @Test
+    public void checkServerAttach() throws ParseException, IOException {
+        List<Path> paths = new ArrayList<>();
+//        paths.add(Paths.get("D:\\e\\serversyn\\test.nta"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\ATest\\A.nts"));
+        for (Path path : paths) {
+            List<NtaRecord> ntas = readNtas(path);
+            for (NtaRecord nta : ntas) {
+                if (nta.getSrcPort() == 443 && nta.getAttachFailSum() > 0) {
+                    System.out.println(nta.getLine());
+                    return;
+                }
+            }
+        }
+    }
+
+    @Test
+    public void topNta() throws IOException {
+        List<Path> paths = new ArrayList<>();
+//        paths.add(Paths.get("D:/e/loadnta/20161116150000_1.nta"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp-3.11.7\\dp-engine\\src\\test\\java\\cn\\com\\netis\\dp\\engine\\regression\\debug\\NtaeOnly\\expected\\multiple\\20120625080000_60s.ntae"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp-3.11.7\\dp-engine\\target\\output\\NtaeOnlyTest\\20120625080000_60s.ntae"));
+        long out = 0;
+        long in = 0;
+        for (Path path : paths) {
+            List<NtaRecord> ntas = readNtas(path);
+            for (NtaRecord nta : ntas) {
+                if (nta.getSrcIp() == -1263971318) {
+                    out += nta.getPktCntSum();
+                } else if (nta.getDestIp() == -1263971318) {
+                    in += nta.getPktCntSum();
+                }
+            }
+        }
+        System.out.println(out + in);
+//        System.out.println(in);
+    }
 
     @Test
     public void spvsyn() throws IOException {
@@ -191,7 +233,10 @@ public class Scripts {
     @Test
     public void calcNtaConn() throws IOException {
         List<Path> ntaFiles = new ArrayList<>();
-        ntaFiles.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\ATest\\GRE_TCP.nta"));
+//        ntaFiles.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\ATest\\GRE_TCP.nta"));
+//        ntaFiles.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\ixia_50cc_1w7c_4_20160919140314.nta"));
+//        ntaFiles.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\ixa_200cc_1w7c_0_20160919135000.nta"));
+        ntaFiles.add(Paths.get("D:/e/machine/20160919171600_1.nta"));
         Map<NtaRecord, NtaRecord> ntaMap = new HashMap<>();
         for (Path ntaFile : ntaFiles) {
             List<String> lines = Files.readAllLines(ntaFile);
@@ -499,93 +544,137 @@ public class Scripts {
     }
 
     @Test
-    public void sumKeyValueNtr() {
+    public void sumKeyValueNtr() throws IOException {
         List<Path> paths = new ArrayList<>();
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505145900.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150000.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150100.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150200.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150300.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150400.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150500.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150600.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150700.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150800.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505150900.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160505151000.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160423143000.nta"));
-
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155500.ntr"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.ntr"));
-
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.ntr"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\shao.nts"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\NtsOnlyTest\\TCP_SLICED.nts"));
         for (Path path : paths) {
-            try {
-                List<String> lines = Files.readAllLines(path);
-                long sum = 0;
-                for (String line : lines) {
-                    final String[] kvs = line.split("\t");
-                    final Map<String, String> map = new HashMap<>();
-                    for (String kv : kvs) {
-                        if (!kv.contains("=")) {
-                            map.put("ts", kv);
-                            continue;
-                        }
-                        String[] k_v = kv.split("=");
-                        map.put(k_v[0], k_v[1]);
-                    }
-
-                    String str = map.get("PktCnt");
-                    if (str != null) {
-                        final int num = Integer.parseInt(str);
-                        sum += num;
-                    }
-                }
-                System.out.println(String.format("%s: %s", path.getFileName(), sum));
-            } catch (IOException e) {
-                e.printStackTrace();
+            List<NtrRecord> ntrs = readNtrs(path);
+            long pktLenSum = 0;
+            long pktCntSum = 0;
+            for (NtrRecord ntr : ntrs) {
+                pktLenSum += ntr.getPktLen();
+                pktCntSum += ntr.getPktCnt();
             }
+            System.out.println(pktLenSum + " " + pktCntSum + " " +  ntrs.size());
         }
     }
 
     @Test
-    public void sumKeyValueNta() throws ParseException {
+    public void compareNtrIpReassemble() throws IOException {
         List<Path> paths = new ArrayList<>();
-//        paths.add(Paths.get("D:\\e\\xflowbyz2\\20160512155500_0.nta"));
-//        paths.add(Paths.get("D:\\e\\xflowbyz2\\20160512155600_0.nta"));
+        Path notReassemble = Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\notReassemble.ntr");
+        Path reassemble = Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\reassemble.ntr");
+        List<NtrRecord> notReassembleNtrs = readNtrs(notReassemble);
+        List<NtrRecord> reassembleNtrs = readNtrs(reassemble);
+        for (NtrRecord notAsm : notReassembleNtrs) {
+            if (notAsm.getPktLen() == 1518) {
+                boolean found = false;
+                for (NtrRecord asm : reassembleNtrs) {
+                    if (asm.getIpId() == notAsm.getIpId() && asm.getPktLen() == notAsm.getPktLen()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    System.out.println(notAsm.getLine());
+                }
+            }
 
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155500.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160512155600.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160526171900_0.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\20160822110000_0.nta"));
-//        paths.add(Paths.get("D:\\e\\shao\\20160822110000_0.nta"));
-        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-engine\\target\\output\\ATest\\shao.nta"));
+        }
+    }
 
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\5025.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\20160511173100_0.ipfix.nta"));
-//        paths.add(Paths.get("D:\\APP\\netis\\dp_\\dp-adapter\\target\\output\\BTest\\nflow9_1503.nta"));
-//        paths.add(Paths.get("D:\\e\\nflow\\v9\\20160512150400_0.nta"));
-//        paths.add(Paths.get("D:\\e\\xflowbyz3\\20160520121800_0.nta"));
+    private List<NtrRecord> readNtrs(final Path path) throws IOException {
+        List<String> lines = Files.readAllLines(path);
+        List<NtrRecord> result = new ArrayList<>();
+        int lineNum = 1;
+        for (String line : lines) {
+            final String[] kvs = line.split("\t");
+            final Map<String, String> map = new HashMap<>();
+            for (String kv : kvs) {
+                if (!kv.contains("=")) {
+                    map.put("ts", kv);
+                    continue;
+                }
+                String[] k_v = kv.split("=");
+                map.put(k_v[0], k_v[1]);
+            }
+            NtrRecord ntr = new NtrRecord();
+            ntr.setLine(lineNum++);
+            String str;
+            str = map.get("SrcIp");
+            if (str != null) {
+                ntr.setSrcIp(Integer.parseInt(str));
+            }
+            str = map.get("DestIp");
+            if (str != null) {
+                ntr.setDestIp(Integer.parseInt(str));
+            }
+            str = map.get("SrcPort");
+            if (str != null) {
+                ntr.setSrcPort(Integer.parseInt(str));
+            }
+            str = map.get("DestPort");
+            if (str != null) {
+                ntr.setDestPort(Integer.parseInt(str));
+            }
+            str = map.get("IpId");
+            if (str != null) {
+                ntr.setIpId(Integer.parseInt(str));
+            }
+            str = map.get("FlowSide");
+            if (str != null) {
+                ntr.setFlowSide(Integer.parseInt(str));
+            }
+            str = map.get("PktLen");
+            if (str != null) {
+                ntr.setPktLen(Integer.parseInt(str));
+            }
+            str = map.get("PktCnt");
+            if (str != null) {
+                ntr.setPktCnt(Integer.parseInt(str));
+            }
+            result.add(ntr);
+        }
+        return result;
+    }
+
+    @Test
+    public void sumKeyValueNta() throws ParseException, IOException {
+        List<Path> paths = new ArrayList<>();
+//        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\SiteAppTest\\SITE_APP.nta"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\src\\test\\java\\cn\\com\\netis\\dp\\engine\\regression\\debug\\SiteApp\\expected\\appDirWithOutAddress\\SITE_APP.nta"));
+        paths.add(Paths.get("D:/APP/netis/dp3.11/dp-engine/target/output/ATest/TCP_SLICED.nta"));
         final SimpleDateFormat tsSdf = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
         long leftTs = tsSdf.parse("2016-05-12 15:04:00").getTime();
         long rightTs = tsSdf.parse("2016-05-12 15:05:00").getTime();
         for (Path path : paths) {
-            try {
-                List<String> lines = Files.readAllLines(path);
-                NtaSum sum = new NtaSum(path);
-                for (String line : lines) {
-                    final String[] kvs = line.split("\t");
-                    final Map<String, String> map = new HashMap<>();
-                    for (String kv : kvs) {
-                        if (!kv.contains("=")) {
+            List<NtaRecord> ntas = readNtas(path);
+
+            NtaSum sum = new NtaSum(path);
+            for (NtaRecord nta : ntas) {
+                sum.setPktLenSum(sum.getPktLenSum() + nta.getPktLenSum());
+                sum.setPktCntSum(sum.getPktCntSum() + nta.getPktCntSum());
+            }
+            System.out.println(sum.getPktLenSum() + " " +  sum.getPktCntSum());
+        }
+    }
+
+    private List<NtaRecord> readNtas(final Path path) throws IOException {
+        List<String> lines = Files.readAllLines(path);
+        List<NtaRecord> results = new ArrayList<>();
+        int lineNum = 0;
+        for (String line : lines) {
+            final String[] kvs = line.split("\t");
+            final Map<String, String> map = new HashMap<>();
+            for (String kv : kvs) {
+                if (!kv.contains("=")) {
 //                            map.put("ts", kv.substring(1, 20));
-                            continue;
-                        }
-                        String[] k_v = kv.split("=");
-                        map.put(k_v[0], k_v[1].trim());
-                    }
-                    String str;
+                    continue;
+                }
+                String[] k_v = kv.split("=");
+                map.put(k_v[0], k_v[1].trim());
+            }
+            String str;
 //                    str = map.get("ts");
 //                    if (str == null) {
 //                        continue;
@@ -611,87 +700,96 @@ public class Scripts {
 //                    }
 
 //                    sum.setTs(ts);
-                    str = map.get("PktCnt_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setPktCntSum(sum.getPktCntSum() + num);
-                    }
-                    str = map.get("PktLen_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setPktLenSum(sum.getPktLenSum() + num);
-                    }
-                    str = map.get("MsgCnt_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setMsgCntSum(sum.getMsgCntSum() + num);
-                    }
-                    str = map.get("MsgCnt_Server_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setMsgCntSumServer(sum.getMsgCntSumServer() + num);
-                    }
-                    str = map.get("MsgCnt_Client_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setMsgCntSumClient(sum.getMsgCntSumClient() + num);
-                    }
-                    str = map.get("ProcTime_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setProcTimeSum(sum.getProcTimeSum() + num);
-                    }
-                    str = map.get("ProcTime_Server_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setProcTimeServerSum(sum.getProcTimeServerSum() + num);
-                    }
-                    str = map.get("ProcTime_Client_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setProcTimeClientSum(sum.getProcTimeClientSum() + num);
-                    }
-                    str = map.get("RespTime_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setRespTimeSum(sum.getRespTimeSum() + num);
-                    }
-                    str = map.get("TransTime_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setTransTimeSum(sum.getTransTimeSum() + num);
-                    }
-                    str = map.get("TransTime_Server_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setTransTimeSumServer(sum.getTransTimeSumServer() + num);
-                    }
-                    str = map.get("TransTime_Client_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setTransTimeSumClient(sum.getTransTimeSumClient() + num);
-                    }
-                    str = map.get("NetworkDelay_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setNetworkDelaySum(sum.getNetworkDelaySum() + num);
-                    }
-                    str = map.get("NetworkDelay_Server_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setNetworkDelaySumServer(sum.getNetworkDelaySumServer() + num);
-                    }
-                    str = map.get("NetworkDelay_Client_Sum");
-                    if (str != null) {
-                        final long num = Long.parseLong(str);
-                        sum.setNetworkDelaySumClient(sum.getNetworkDelaySumClient() + num);
-                    }
-                }
-                System.out.println(sum);
-            } catch (IOException e) {
-                e.printStackTrace();
+            NtaRecord nta = new NtaRecord();
+            nta.setPath(path);
+            nta.setLine(lineNum++);
+            str = map.get("SrcIp");
+            if (str != null) {
+                nta.setSrcIp(Integer.parseInt(str));
             }
+            str = map.get("SrcPort");
+            if (str != null) {
+                nta.setSrcPort(Integer.parseInt(str));
+            }
+            str = map.get("DestIp");
+            if (str != null) {
+                nta.setDestIp(Integer.parseInt(str));
+            }
+            str = map.get("DestPort");
+            if (str != null) {
+                nta.setDestPort(Integer.parseInt(str));
+            }
+            str = map.get("PktCnt_Sum");
+            if (str != null) {
+                nta.setPktCntSum(Long.parseLong(str));
+            }
+            str = map.get("PktLen_Sum");
+            if (str != null) {
+                nta.setPktLenSum(Long.parseLong(str));
+            }
+            str = map.get("MsgCnt_Sum");
+            if (str != null) {
+                nta.setMsgCntSum(Long.parseLong(str));
+            }
+            str = map.get("MsgCnt_Server_Sum");
+            if (str != null) {
+                nta.setMsgCntSumServer(Long.parseLong(str));
+            }
+            str = map.get("MsgCnt_Client_Sum");
+            if (str != null) {
+                nta.setMsgCntSumClient(Long.parseLong(str));
+            }
+            str = map.get("ProcTime_Sum");
+            if (str != null) {
+                nta.setProcTimeSum(Long.parseLong(str));
+            }
+            str = map.get("ProcTime_Server_Sum");
+            if (str != null) {
+                nta.setProcTimeServerSum(Long.parseLong(str));
+            }
+            str = map.get("ProcTime_Client_Sum");
+            if (str != null) {
+                nta.setProcTimeClientSum(Long.parseLong(str));
+            }
+            str = map.get("RespTime_Sum");
+            if (str != null) {
+                nta.setRespTimeSum(Long.parseLong(str));
+            }
+            str = map.get("TransTime_Sum");
+            if (str != null) {
+                nta.setTransTimeSum(Long.parseLong(str));
+            }
+            str = map.get("TransTime_Server_Sum");
+            if (str != null) {
+                nta.setTransTimeSumServer(Long.parseLong(str));
+            }
+            str = map.get("TransTime_Client_Sum");
+            if (str != null) {
+                nta.setTransTimeSumClient(Long.parseLong(str));
+            }
+            str = map.get("NetworkDelay_Sum");
+            if (str != null) {
+                nta.setNetworkDelaySum(Long.parseLong(str));
+            }
+            str = map.get("NetworkDelay_Server_Sum");
+            if (str != null) {
+                nta.setNetworkDelaySumServer(Long.parseLong(str));
+            }
+            str = map.get("NetworkDelay_Client_Sum");
+            if (str != null) {
+                nta.setNetworkDelaySumClient(Long.parseLong(str));
+            }
+            str = map.get("AttachSucc_Sum");
+            if (str != null) {
+                nta.setAttachSuccessSum(Long.parseLong(str));
+            }
+            str = map.get("AttachFail_Sum");
+            if (str != null) {
+                nta.setAttachFailSum(Long.parseLong(str));
+            }
+            results.add(nta);
         }
+        return results;
     }
 
     @Test
@@ -800,6 +898,30 @@ public class Scripts {
             sb.append(" D:/e/collector_x3650/collector_x3650_").append(i).append(".pcap");
         }
         Runtime.getRuntime().exec("mergecap -w D:/e/collector_x3650/collector_x3650_merged.pcap " + sb.toString());
+    }
+
+    @Test
+    public void copyFolder() throws IOException {
+        Path from = Paths.get("D:\\APP\\netis\\dcd\\dcd-parser\\src\\test\\java\\cn\\com\\netis\\dcd\\parser\\regression");
+        Path to = Paths.get("D:\\TMP\\aaa");
+
+        Files.walkFileTree(from, new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                Path rel = file.subpath(from.getNameCount(), file.getNameCount());
+                Path dest = to.resolve(rel);
+                if (Files.isRegularFile(file)) {
+                    if (file.getFileName().toString().endsWith("conf.xml")) {
+                        if (!Files.exists(dest.getParent())) {
+                            Files.createDirectories(dest.getParent());
+                        }
+                        Files.copy(file, dest);
+                    }
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
 }

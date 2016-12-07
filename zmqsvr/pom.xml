@@ -19,19 +19,40 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
                 <executions>
                     <execution>
+                        <id>Copy dependencies to lib</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <excludeGroupIds>${project.groupId}</excludeGroupIds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Copy dependencies to bin</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/bin</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <excludeTransitive>true</excludeTransitive>
+                            <includeGroupIds>${project.groupId}</includeGroupIds>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -39,10 +60,58 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>../lib/</classpathPrefix>
                             <mainClass>${java.mainClass}</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>Delete directories</id>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.basedir}/bin" />
+                                <delete dir="${project.basedir}/lib" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Prepare directories</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.basedir}/bin" />
+                                <mkdir dir="${project.basedir}/lib" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Copy artifacts to bin</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                    tofile="${project.basedir}/bin/${project.build.finalName}.jar" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
