@@ -7,13 +7,14 @@ package com.y3r9.c47.dog.swj;
  */
 final class DataResult {
 
-    private Data data;
+    /** The Result. */
+    private int result;
 
-    public Data getData() {
-        return data;
+    public int getResult() {
+        return result;
     }
 
-    public void setData(final Data value) {
-        data = value;
+    public void setResult(final int value) {
+        result = value;
     }
 }

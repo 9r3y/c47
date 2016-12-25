@@ -38,7 +38,7 @@ final class DataJoinHandler extends AbstractJoinHandler<DataResult, Void> {
 
     @Override
     public void consumeJoinResult(final DataResult resultData) {
-//        System.out.println(resultData.getData().getMs());
+//        System.out.println(resultData.getData().getWork());
 //        updateProgress();
     }
 

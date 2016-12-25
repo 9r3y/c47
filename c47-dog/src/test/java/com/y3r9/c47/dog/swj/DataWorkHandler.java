@@ -22,16 +22,17 @@ final class DataWorkHandler extends AbstractWorkHandler<Data, DataContext, DataR
     @Override
     protected DataResult execute(final Data data, final DataContext context) {
         int sum = 1;
-        for (int i = 0; i < data.getMs(); i++) {
-            sum *= sum;
+        for (int i = 0; i < data.getWork(); i++) {
+            sum += 1;
         }
 //        try {
-//            Thread.sleep(data.getMs());
+//            Thread.sleep(data.getWork());
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
+        data.setWork(sum);
         final DataResult result = new DataResult();
-        result.setData(data);
+        result.setResult(sum);
         return result;
     }
 }

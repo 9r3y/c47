@@ -28,6 +28,9 @@ public final class SwjTest {
     /** The Last print time. */
     private long lastPrintTime = 0;
 
+    /** The Last out token. */
+    private long lastOutToken = 0;
+
     /**
      * Set the test up.
      */
@@ -46,14 +49,15 @@ public final class SwjTest {
             System.exit(3);
         });
 
-        DataGraph graph = DataGraphBuilder.buildGraph(getBtrParseParallelConfig());
+        DataGraph graph = DataGraphBuilder.buildGraph(getNtrParseParallelConfig());
         SplitNode<Data, DataContext, DataResult> splitNode = graph.getSplitNode();
 
+
         splitNode.open();
-        Random random = new Random();
+//        Random random = new Random();
+        Data data = new Data();
+        data.setWork(10);
         while (true) {
-            Data data = new Data();
-            data.setMs(random.nextInt(4096));
             printGraphStatus(graph);
             splitNode.dispatch(data);
         }
@@ -61,12 +65,15 @@ public final class SwjTest {
 
     private void printGraphStatus(final ParallelGraphObservable obs) {
         long now = System.currentTimeMillis();
-        if (now - lastPrintTime < 1000) {
+        final long timeSpan = now - lastPrintTime;
+        if (timeSpan < 1000) {
             return;
         }
         final long dispatchToken = obs.getDispatchTokenPosition();
         final JoinNodeObservable joinNodeObs = obs.getJoinNodeObservable();
         final long outToken = joinNodeObs.getOutTokenPosition();
+        final long outTokenDelta = outToken - lastOutToken;
+        final long outTokenPS = outTokenDelta / timeSpan;
 
         final int[] caches = obs.getPartitionProfile();
         int cache = 0;
@@ -77,16 +84,18 @@ public final class SwjTest {
         StringBuilder sb = new StringBuilder();
         sb.append("dispatchToken: ").append(dispatchToken)
                 .append("\toutToken: ").append(outToken)
+                .append("\toutTokenPerSec: ").append(outTokenPS)
                 .append("\tinUseToken: ").append(dispatchToken - outToken)
                 .append("\tcache: ").append(cache);
         System.out.println(sb.toString());
 
+        lastOutToken = outToken;
         lastPrintTime = now;
     }
 
     private Configuration getPreParseParallelConfig() {
         final Configuration result = new XMLConfiguration();
-        result.addProperty(ParallelKey.workerCount.name(), 7);
+        result.addProperty(ParallelKey.workerCount.name(), 1);
         result.addProperty(ParallelKey.workerToPartFactor.name(), 1);
 
         result.addProperty(ParallelKey.joinPipeCapability.name(), 65536);
@@ -110,6 +119,38 @@ public final class SwjTest {
         return result;
     }
 
+    private Configuration getNtrParseParallelConfig() {
+        final Configuration result = new XMLConfiguration();
+        result.addProperty(ParallelKey.workerCount.name(), 4);
+        result.addProperty(ParallelKey.partitionCount.name(), 1024);
+//        result.addProperty(ParallelKey.joinPipeCapability.name(), 4000000);
+//        result.addProperty(ParallelKey.cacheTokenCount.name(), 1000000);
+        result.addProperty(ParallelKey.joinPipeCapability.name(), 4000000);
+        result.addProperty(ParallelKey.cacheTokenCount.name(), 10000000);
+
+        Configuration splitNodeConfig = new XMLConfiguration();
+        result.addProperty(ParallelKey.splitNode.name(), splitNodeConfig);
+        splitNodeConfig.addProperty(PollingKey.overSizeRetryCount.name(), -1);
+        splitNodeConfig.addProperty(PollingKey.idleParkMode.name(), "sleep");
+
+        Configuration workNodeConfig = new XMLConfiguration();
+        result.addProperty(ParallelKey.workNode.name(), workNodeConfig);
+        workNodeConfig.addProperty(PollingKey.idleRetryCount.name(), 100);
+        workNodeConfig.addProperty(PollingKey.idleParkMode.name(), "sleep");
+
+        Configuration joinNodeConfig = new XMLConfiguration();
+        result.addProperty(ParallelKey.joinNode.name(), joinNodeConfig);
+        joinNodeConfig.addProperty(PollingKey.idleRetryCount.name(), -1);
+        joinNodeConfig.addProperty(ParallelKey.dataType.name(), "batch");
+
+        Configuration partitionNodeConfig = new XMLConfiguration();
+        result.addProperty(ParallelKey.partitionNode.name(), partitionNodeConfig);
+//        partitionNodeConfig.addProperty(PollingKey.breakProcessSize.name(), 64);
+//        partitionNodeConfig.addProperty(PollingKey.partitionScheduler.name(), "priority");
+
+        return result;
+    }
+
     private Configuration getBtrParseParallelConfig() {
         final Configuration result = new XMLConfiguration();
         result.addProperty(ParallelKey.workerCount.name(), 15);
@@ -117,7 +158,7 @@ public final class SwjTest {
 //        result.addProperty(ParallelKey.joinPipeCapability.name(), 4000000);
 //        result.addProperty(ParallelKey.cacheTokenCount.name(), 1000000);
         result.addProperty(ParallelKey.joinPipeCapability.name(), 4000000);
-        result.addProperty(ParallelKey.cacheTokenCount.name(), 10000);
+        result.addProperty(ParallelKey.cacheTokenCount.name(), 100000);
 
         Configuration splitNodeConfig = new XMLConfiguration();
         result.addProperty(ParallelKey.splitNode.name(), splitNodeConfig);
@@ -134,7 +175,7 @@ public final class SwjTest {
 
         Configuration partitionNodeConfig = new XMLConfiguration();
         result.addProperty(ParallelKey.partitionNode.name(), partitionNodeConfig);
-        partitionNodeConfig.addProperty(PollingKey.breakProcessSize.name(), 64);
+        partitionNodeConfig.addProperty(PollingKey.breakProcessSize.name(), 1);
         partitionNodeConfig.addProperty(PollingKey.partitionScheduler.name(), "priority");
 
         return result;

@@ -7,13 +7,13 @@ package com.y3r9.c47.dog.swj;
  */
 final class Data {
 
-    private int ms;
+    private int work;
 
-    public int getMs() {
-        return ms;
+    public int getWork() {
+        return work;
     }
 
-    public void setMs(final int value) {
-        ms = value;
+    public void setWork(final int value) {
+        work = value;
     }
 }
