@@ -253,6 +253,10 @@
             <artifactId>jt400-full</artifactId>
             <version>7.10</version>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.11</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

@@ -109,6 +109,8 @@ public class Test {
     }
 
     public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
+        System.out.println(Runtime.getRuntime().availableProcessors());
+        System.out.println(ForkJoinPool.commonPool().getParallelism());
 //        MinMaxPriorityQueue<Long> queue = MinMaxPriorityQueue.maximumSize(50).create();
 /*        BoundedPriorityQueue<Long> queue = new BoundedPriorityQueue<>(50, (o1, o2) -> {
             return o1.compareTo(o2);
