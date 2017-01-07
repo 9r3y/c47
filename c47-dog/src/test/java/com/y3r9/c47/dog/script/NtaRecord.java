@@ -91,6 +91,9 @@ final class NtaRecord {
     /** The Attach fail sum. */
     private long attachFailSum;
 
+    /** The Flow dir. */
+    private int flowDir;
+
     /**
      * Merge.
      *
@@ -601,5 +604,23 @@ final class NtaRecord {
      */
     public void setAttachFailSum(final long value) {
         attachFailSum = value;
+    }
+
+    /**
+     * Gets flow dir.
+     *
+     * @return the flow dir
+     */
+    public int getFlowDir() {
+        return flowDir;
+    }
+
+    /**
+     * Sets flow dir.
+     *
+     * @param value the value
+     */
+    public void setFlowDir(final int value) {
+        flowDir = value;
     }
 }

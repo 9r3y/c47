@@ -1,7 +1,11 @@
 package com.y3r9.c47.dog.swj;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -11,8 +15,11 @@ import org.junit.After;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 
+import com.y3r9.c47.dog.CasLock;
 import com.y3r9.c47.dog.swj.config.key.ParallelKey;
 import com.y3r9.c47.dog.swj.config.key.PollingKey;
+import com.y3r9.c47.dog.swj.model.collection.SafeInDualQueue;
+import com.y3r9.c47.dog.swj.model.collection.spi.DualQueue;
 import com.y3r9.c47.dog.swj.model.parallel.spi.SplitNode;
 
 import cn.com.netis.dp.commons.common.statis.JoinNodeObservable;
@@ -25,18 +32,41 @@ public final class SwjTest {
     /** The backspace char. */
     private static final char BACKSPACE_CHAR = '\b';
 
-    /** The Last print time. */
-    private long lastPrintTime = 0;
-
-    /** The Last out token. */
-    private long lastOutToken = 0;
-
     /**
      * Set the test up.
      */
     @Before
     public void setUp() {
         mockery = new JUnit4Mockery();
+    }
+
+    @Test
+    public void testPartitionNodeQueue() {
+
+//        DualQueue<Integer> queue = new SafeInDualQueue<>();
+//        Queue<Integer> queue = new ConcurrentLinkedDeque<>();
+//        final Lock lock = new ReentrantLock();
+        final Lock lock = new CasLock();
+
+
+        Integer in = new Integer(10);
+        for (long i = 0; i < 100000000L; i++) {
+            lock.lock();
+            lock.unlock();
+//            queue.addToInQueue(in);
+//            queue.add(10);
+        }
+
+        long start = System.currentTimeMillis();
+
+        for (long i = 0; i < 100000000L; i++) {
+            lock.lock();
+            lock.unlock();
+//            queue.addToInQueue(in);
+//            queue.add(10);
+        }
+
+        System.out.println(System.currentTimeMillis() - start);
     }
 
     /**
@@ -55,42 +85,13 @@ public final class SwjTest {
 
         splitNode.open();
 //        Random random = new Random();
-        Data data = new Data();
-        data.setWork(10);
+        final Thread meterThread = new Thread(new Meter(graph), "Meter");
+        meterThread.setDaemon(true);
+        meterThread.start();
         while (true) {
-            printGraphStatus(graph);
+            Data data = new Data();
             splitNode.dispatch(data);
         }
-    }
-
-    private void printGraphStatus(final ParallelGraphObservable obs) {
-        long now = System.currentTimeMillis();
-        final long timeSpan = now - lastPrintTime;
-        if (timeSpan < 1000) {
-            return;
-        }
-        final long dispatchToken = obs.getDispatchTokenPosition();
-        final JoinNodeObservable joinNodeObs = obs.getJoinNodeObservable();
-        final long outToken = joinNodeObs.getOutTokenPosition();
-        final long outTokenDelta = outToken - lastOutToken;
-        final long outTokenPS = outTokenDelta / timeSpan;
-
-        final int[] caches = obs.getPartitionProfile();
-        int cache = 0;
-        for (int num : caches) {
-            cache += num;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("dispatchToken: ").append(dispatchToken)
-                .append("\toutToken: ").append(outToken)
-                .append("\toutTokenPerSec: ").append(outTokenPS)
-                .append("\tinUseToken: ").append(dispatchToken - outToken)
-                .append("\tcache: ").append(cache);
-        System.out.println(sb.toString());
-
-        lastOutToken = outToken;
-        lastPrintTime = now;
     }
 
     private Configuration getPreParseParallelConfig() {
@@ -146,7 +147,7 @@ public final class SwjTest {
         Configuration partitionNodeConfig = new XMLConfiguration();
         result.addProperty(ParallelKey.partitionNode.name(), partitionNodeConfig);
 //        partitionNodeConfig.addProperty(PollingKey.breakProcessSize.name(), 64);
-//        partitionNodeConfig.addProperty(PollingKey.partitionScheduler.name(), "priority");
+//        partitionNodeConfig.addProperty(PollingKey.partitionScheduler.name(), "queue");
 
         return result;
     }

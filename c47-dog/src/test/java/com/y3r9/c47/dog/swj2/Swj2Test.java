@@ -38,17 +38,16 @@ public final class Swj2Test {
     @Test
     public void testDefault() throws IOException {
         final Partitionable<Data> partitioner = new Partitioner();
-        final OutputHandler<Void> outHandle = new OutHandler();
-        final WorkHandler<Data, Void> work = new Work();
-        Processor<Data, Void> processor = new Processor<>(1024, partitioner, 2000000, outHandle, work);
-        Data data = new Data();
+        final OutputHandler<Data> outHandle = new OutHandler();
+        final WorkHandler<Data, Data> work = new Work();
+        Processor<Data, Data> processor = new Processor<>(16, partitioner, 2000000, outHandle, work);
         while (true) {
-            processor.dispatch(data);
+            processor.dispatch(new Data());
             printGraphStatus(processor);
         }
     }
 
-    private void printGraphStatus(final Processor<Data, Void> obs) {
+    private void printGraphStatus(final Processor<Data, Data> obs) {
         long now = System.currentTimeMillis();
         final long timeSpan = now - lastPrintTime;
         if (timeSpan < 1000) {

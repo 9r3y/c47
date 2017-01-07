@@ -17,8 +17,8 @@ public final class Processor<I extends SwjData, O> {
         final int newTail = tail + 1 & cacheSizeMask;
         final boolean result = newTail != head;
         if (result) {
+            input.setToken(tail);
             tail = newTail;
-            input.setToken(newTail);
             final int part = partitionable.partition(input);
             partitions[part].add(input);
         }
@@ -43,10 +43,9 @@ public final class Processor<I extends SwjData, O> {
 
         workHandler = work;
 
-        workAction = new WorkAction(0, cache.length);
+        workAction = new WorkAction(0, partitions.length);
 
         new Thread(new OutputRunner(), "OutputRunner").start();
-        pool.invoke(workAction);
     }
 
     public long getOutToken() {
@@ -80,6 +79,9 @@ public final class Processor<I extends SwjData, O> {
     /** The Tail. */
     private volatile int tail = 0;
 
+    /** The Deadline. */
+    private volatile int deadline = 0;
+
     /** The Out token. */
     private long outToken;
 
@@ -88,15 +90,23 @@ public final class Processor<I extends SwjData, O> {
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-                if (workAction.isDone()) {
+//                if (((tail + 1) & cacheSizeMask) == head) {
+                if (deadline == head) {
+                    deadline = tail;
                     workAction.reinitialize();
                     pool.invoke(workAction);
                 }
                 final O out = cache[head];
                 if (out == null) {
-                    Thread.yield();
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+//                    Thread.yield();
                     continue;
                 }
+                cache[head] = null;
                 head = head + 1 & cacheSizeMask;
                 outHandler.handle(out);
                 outToken++;

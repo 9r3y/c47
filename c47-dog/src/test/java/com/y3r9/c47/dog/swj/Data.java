@@ -7,7 +7,7 @@ package com.y3r9.c47.dog.swj;
  */
 final class Data {
 
-    private int work;
+    private int work = 10;
 
     public int getWork() {
         return work;

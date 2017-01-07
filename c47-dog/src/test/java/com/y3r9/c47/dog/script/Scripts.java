@@ -546,7 +546,8 @@ public class Scripts {
     @Test
     public void sumKeyValueNtr() throws IOException {
         List<Path> paths = new ArrayList<>();
-        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\NtsOnlyTest\\TCP_SLICED.nts"));
+//        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\NtsOnlyTest\\TCP_SLICED.nts"));
+        paths.add(Paths.get("D:\\APP\\netis\\dp-3.11.9\\dp-engine\\target\\output\\NtsOnlyTest\\TCP_SLICED.nts"));
         for (Path path : paths) {
             List<NtrRecord> ntrs = readNtrs(path);
             long pktLenSum = 0;
@@ -643,17 +644,21 @@ public class Scripts {
         List<Path> paths = new ArrayList<>();
 //        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\target\\output\\SiteAppTest\\SITE_APP.nta"));
 //        paths.add(Paths.get("D:\\APP\\netis\\dp3.11\\dp-engine\\src\\test\\java\\cn\\com\\netis\\dp\\engine\\regression\\debug\\SiteApp\\expected\\appDirWithOutAddress\\SITE_APP.nta"));
-        paths.add(Paths.get("D:/APP/netis/dp3.11/dp-engine/target/output/ATest/TCP_SLICED.nta"));
+//        paths.add(Paths.get("D:/APP/netis/dp3.11/dp-engine/target/output/ATest/TCP_SLICED.nta"));
+        paths.add(Paths.get("D:\\e\\root\\nta\\20161223132000_0.nta"));
+        paths.add(Paths.get("D:\\e\\root\\nta\\20161223132000_1.nta"));
         final SimpleDateFormat tsSdf = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
-        long leftTs = tsSdf.parse("2016-05-12 15:04:00").getTime();
-        long rightTs = tsSdf.parse("2016-05-12 15:05:00").getTime();
+//        long leftTs = tsSdf.parse("2016-05-12 15:04:00").getTime();
+//        long rightTs = tsSdf.parse("2016-05-12 15:05:00").getTime();
         for (Path path : paths) {
             List<NtaRecord> ntas = readNtas(path);
 
             NtaSum sum = new NtaSum(path);
             for (NtaRecord nta : ntas) {
-                sum.setPktLenSum(sum.getPktLenSum() + nta.getPktLenSum());
-                sum.setPktCntSum(sum.getPktCntSum() + nta.getPktCntSum());
+                if (nta.getFlowDir() == 1) {
+                    sum.setPktLenSum(sum.getPktLenSum() + nta.getPktLenSum());
+                    sum.setPktCntSum(sum.getPktCntSum() + nta.getPktCntSum());
+                }
             }
             System.out.println(sum.getPktLenSum() + " " +  sum.getPktCntSum());
         }
@@ -786,6 +791,10 @@ public class Scripts {
             str = map.get("AttachFail_Sum");
             if (str != null) {
                 nta.setAttachFailSum(Long.parseLong(str));
+            }
+            str = map.get("FlowDir");
+            if (str != null) {
+                nta.setFlowDir(Integer.parseInt(str));
             }
             results.add(nta);
         }

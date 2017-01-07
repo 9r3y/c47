@@ -85,6 +85,7 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.HexDump;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.net.ntp.TimeStamp;
 
 import com.google.common.collect.MinMaxPriorityQueue;
@@ -92,9 +93,11 @@ import com.ibm.as400.access.AS400Text;
 import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
 import com.y3r9.c47.dog.swj.model.collection.BoundedPriorityQueue;
 import com.y3r9.c47.dog.swj.value.Power2Utils;
+import com.y3r9.c47.dog.swj.value.Timestamp;
 import com.y3r9.c47.dog.util.JsonUtils;
 
 import cn.com.netis.dp.commons.common.packet.FlowSide;
+import cn.com.netis.dp.commons.lang.Constants;
 import redis.clients.jedis.Jedis;
 import scala.tools.nsc.Global;
 import tachyon.util.io.FileUtils;
@@ -108,9 +111,25 @@ public class Test {
         }
     }
 
-    public static void main(String[] args) throws DecoderException, XMLStreamException, IOException {
-        System.out.println(Runtime.getRuntime().availableProcessors());
-        System.out.println(ForkJoinPool.commonPool().getParallelism());
+    public static void main(String[] args) throws DecoderException, XMLStreamException, IOException, ParseException {
+        Thread t = new Thread();
+        Thread.State f = t.getState();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = sdf.parse("2016-12-29 22:13:00");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+:08:00"));
+        System.out.println(date);
+        System.out.println(date.getTime());
+        System.out.println(TimeUnit.MILLISECONDS.toSeconds(date.getTime()));
+        ForkJoinPool.commonPool().shutdown();
+
+
+
+        System.out.println(formatTimestamp(1481188326569806000L));
+        System.out.println(formatTimestamp(1481188360115428000L));
+        System.out.println(formatTimestamp(1481188354345015000L));
+        System.out.println(formatTimestamp(1481188360879563000L));
+        Set<String> ff = new HashSet<>();
+        System.out.println(ff);
 //        MinMaxPriorityQueue<Long> queue = MinMaxPriorityQueue.maximumSize(50).create();
 /*        BoundedPriorityQueue<Long> queue = new BoundedPriorityQueue<>(50, (o1, o2) -> {
             return o1.compareTo(o2);
@@ -138,15 +157,38 @@ public class Test {
             sb.append(' ').append(l);
         }
         System.out.println(sb.toString());*/
-        Calendar cld = Calendar.getInstance();
-        cld.set(Calendar.SECOND, 0);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        Path monitor = Paths.get("D:/TMP/monitor");
-        for (int i = 0; i < 100; i++) {
-            cld.add(Calendar.MINUTE, 1);
-            final String fileName = sdf.format(cld.getTime()) + ".pcap";
-            FileUtils.createFile(monitor.resolve(fileName).toString());
+//        Calendar cld = Calendar.getInstance();
+//        cld.set(Calendar.SECOND, 0);
+//        Path monitor = Paths.get("D:/TMP/monitor");
+//        for (int i = 0; i < 100; i++) {
+//            cld.add(Calendar.MINUTE, 1);
+//            final String fileName = sdf.format(cld.getTime()) + ".pcap";
+//            FileUtils.createFile(monitor.resolve(fileName).toString());
+//        }
+        for (int i = 0; i < 8; i++) {
+            new Thread(new DeadLoop(), String.valueOf(i)).start();
         }
+    }
+
+    static class DeadLoop implements Runnable {
+
+        @Override
+        public void run() {
+            while (true) {
+
+            }
+        }
+    }
+
+    private static String formatTimestamp(final long timestamp) {
+        Date date = new Date();
+        date.setTime(Timestamp.toLongMilliseconds(timestamp));
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%tY-%<tm-%<td %<tH:%<tM:%<tS", date));
+        final String subSeconds2 = String.format(
+                "%.9f", Timestamp.getSubSecond(timestamp));
+        builder.append(subSeconds2.substring(1));
+        return builder.toString();
     }
 
     public static void testDecompress() throws IOException {
