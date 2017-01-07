@@ -43,16 +43,54 @@ public final class Processor<I extends SwjData, O> {
 
         workHandler = work;
 
+        workAction = new WorkAction(0, cache.length);
+
         new Thread(new OutputRunner(), "OutputRunner").start();
+        pool.invoke(workAction);
     }
+
+    public long getOutToken() {
+        return outToken;
+    }
+
+    public int getCache() {
+        int result  = tail - head;
+        return result < 0 ? result + cache.length : result;
+    }
+
+    private final WorkAction workAction;
+
+    private final WorkHandler<I, O> workHandler;
+
+    private final ForkJoinPool pool = ForkJoinPool.commonPool();
+
+    private Partition<I>[] partitions;
+
+    private O[] cache;
+
+    private Partitionable<I> partitionable;
+
+    private OutputHandler<O> outHandler;
+
+    private final int cacheSizeMask;
+
+    /** The Head. */
+    private volatile int head = 0;
+
+    /** The Tail. */
+    private volatile int tail = 0;
+
+    /** The Out token. */
+    private long outToken;
 
     private final class OutputRunner implements Runnable {
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-                if (pool.isTerminated()) {
-                    pool.invoke(new WorkAction(0, cache.length));
+                if (workAction.isDone()) {
+                    workAction.reinitialize();
+                    pool.invoke(workAction);
                 }
                 final O out = cache[head];
                 if (out == null) {
@@ -97,38 +135,6 @@ public final class Processor<I extends SwjData, O> {
             this.end = end;
         }
     }
-
-    public long getOutToken() {
-        return outToken;
-    }
-
-    public int getCache() {
-        int result  = tail - head;
-        return result < 0 ? result + cache.length : result;
-    }
-
-    private final WorkHandler<I, O> workHandler;
-
-    private final ForkJoinPool pool = ForkJoinPool.commonPool();
-
-    private Partition<I>[] partitions;
-
-    private O[] cache;
-
-    private Partitionable<I> partitionable;
-
-    private OutputHandler<O> outHandler;
-
-    private final int cacheSizeMask;
-
-    /** The Head. */
-    private volatile int head = 0;
-
-    /** The Tail. */
-    private volatile int tail = 0;
-
-    /** The Out token. */
-    private long outToken;
 
 
 }
