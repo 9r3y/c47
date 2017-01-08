@@ -1,7 +1,6 @@
 package com.y3r9.c47.dog.swj2;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.CyclicBarrier;
 
 import com.y3r9.c47.dog.swj.value.Power2Utils;
 
@@ -10,14 +9,16 @@ import com.y3r9.c47.dog.swj.value.Power2Utils;
  *
  * @version 1.0
  */
-public final class Processor<I extends SwjData, O> {
+public final class Processor<I extends SwjData, C, O> {
 
     @SuppressWarnings("unchecked")
     public boolean dispatch(I input) {
-        final int newTail = tail + 1 & cacheSizeMask;
+        final int oldTail = tail;
+        final int newTail = (oldTail + 1) & cacheSizeMask;
         final boolean result = newTail != head;
         if (result) {
-            input.setToken(tail);
+            token++;
+            input.setToken(oldTail);
             tail = newTail;
             final int part = partitionable.partition(input);
             partitions[part].add(input);
@@ -26,30 +27,42 @@ public final class Processor<I extends SwjData, O> {
     }
 
     @SuppressWarnings("unchecked")
-    public Processor(int partCount, Partitionable<I> part, int cacheSize, OutputHandler<O> outHandle, WorkHandler<I, O> work) {
-        final int count = Power2Utils.power2Ceil(partCount);
-        partitions = new Partition[count];
-        for (int i = 0; i < count; i++) {
-            partitions[i] = new Partition<>();
-        }
-        part.setPartitionCount(count);
-        partitionable = part;
-
+    public Processor(int partCount, Partitionable<I> part, int cacheSize, OutputHandler<O> outHandle, WorkHandler<I,C, O> work) {
         final int size = Power2Utils.power2Ceil(cacheSize);
         cacheSizeMask = size - 1;
         cache = (O[]) new Object[size];
 
-        outHandler = outHandle;
-
         workHandler = work;
 
-        workAction = new WorkAction(0, partitions.length);
+        final int count = Power2Utils.power2Ceil(partCount);
+        partitions = new Partition[count];
+        for (int i = 0; i < count; i++) {
+            partitions[i] = new Partition(this, new Object());
+        }
+        part.setPartitionCount(count);
+        partitionable = part;
 
-        new Thread(new OutputRunner(), "OutputRunner").start();
+        outHandler = outHandle;
+
+
+        int coreAvail = Runtime.getRuntime().availableProcessors();
+        int avail = 4;
+        cores = new Core[avail];
+        final int ppCount = partCount / avail;
+        barrier = new CyclicBarrier(avail, new Bumper());
+        for (int i = 0, j = 0; i < avail; i++, j+=ppCount) {
+//            cores[i] = new Core1(i, this, j, i == avail -1 ? partCount : j + ppCount);
+//            cores[i] = new Core2(i, this);
+            cores[i] = new Core3(i, this, j, i == avail -1 ? partCount : j + ppCount);
+        }
+        for (Core core : cores) {
+            core.start();
+        }
+//        new Thread(new OutputRunner(), "OutputRunner").start();
     }
 
-    public long getOutToken() {
-        return outToken;
+    public long getToken() {
+        return token;
     }
 
     public int getCache() {
@@ -57,15 +70,13 @@ public final class Processor<I extends SwjData, O> {
         return result < 0 ? result + cache.length : result;
     }
 
-    private final WorkAction workAction;
+    final WorkHandler<I,C, O> workHandler;
 
-    private final WorkHandler<I, O> workHandler;
+    Partition[] partitions;
 
-    private final ForkJoinPool pool = ForkJoinPool.commonPool();
+    O[] cache;
 
-    private Partition<I>[] partitions;
-
-    private O[] cache;
+    Core[] cores;
 
     private Partitionable<I> partitionable;
 
@@ -73,78 +84,56 @@ public final class Processor<I extends SwjData, O> {
 
     private final int cacheSizeMask;
 
+    CyclicBarrier barrier;
+
     /** The Head. */
-    private volatile int head = 0;
+    private int head = 0;
 
     /** The Tail. */
-    private volatile int tail = 0;
-
-    /** The Deadline. */
-    private volatile int deadline = 0;
+    private int tail = 0;
 
     /** The Out token. */
-    private long outToken;
+    private long token;
 
     private final class OutputRunner implements Runnable {
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-//                if (((tail + 1) & cacheSizeMask) == head) {
-                if (deadline == head) {
-                    deadline = tail;
-                    workAction.reinitialize();
-                    pool.invoke(workAction);
-                }
-                final O out = cache[head];
+                final int oldHead = head;
+                final O out = cache[oldHead];
                 if (out == null) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-//                    Thread.yield();
+                    Thread.yield();
                     continue;
                 }
-                cache[head] = null;
-                head = head + 1 & cacheSizeMask;
+                cache[oldHead] = null;
+                head = (oldHead + 1) & cacheSizeMask;
                 outHandler.handle(out);
-                outToken++;
             }
         }
     }
 
-    final class WorkAction extends RecursiveAction {
-
-        private final int start;
-
-        private final int end;
+    private final class Bumper implements Runnable {
 
         @Override
-        protected void compute() {
-            if (end - start <= 1) {
-                final Partition<I> partition = partitions[start];
-                partition.fetch();
-                while (true) {
-                    final I input = partition.get();
-                    if (input == null) {
-                        break;
-                    }
-                    final O out = workHandler.handle(input);
-                    cache[input.getToken()] = out;
+        public void run() {
+            int count = 0;
+            while (true) {
+                final int oldHead = head;
+                final O out = cache[oldHead];
+                if (out == null) {
+                    break;
                 }
-            } else {
-                int middle = (start + end) / 2;
-                invokeAll(new WorkAction(start, middle),
-                        new WorkAction(middle, end));
+                count++;
+                cache[oldHead] = null;
+                head = (oldHead + 1) & cacheSizeMask;
+                outHandler.handle(out);
+            }
+            System.out.println("sprint " + count);
+            for (Core core : cores) {
+                core.prepareNextSprint();
             }
         }
-
-        public WorkAction(final int start, final int end) {
-            this.start = start;
-            this.end = end;
-        }
     }
-
 
 }

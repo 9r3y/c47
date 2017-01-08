@@ -8,21 +8,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import cn.com.netis.dp.commons.common.statis.JoinNodeObservable;
-import cn.com.netis.dp.commons.common.statis.ParallelGraphObservable;
-
 /**
  */
 public final class Swj2Test {
 
     /** The backspace char. */
     private static final char BACKSPACE_CHAR = '\b';
-
-    /** The Last print time. */
-    private long lastPrintTime = 0;
-
-    /** The Last out token. */
-    private long lastOutToken = 0;
 
     /**
      * Set the test up.
@@ -39,33 +30,63 @@ public final class Swj2Test {
     public void testDefault() throws IOException {
         final Partitionable<Data> partitioner = new Partitioner();
         final OutputHandler<Data> outHandle = new OutHandler();
-        final WorkHandler<Data, Data> work = new Work();
-        Processor<Data, Data> processor = new Processor<>(16, partitioner, 2000000, outHandle, work);
+        final WorkHandler<Data, Object, Data> work = new Work();
+
+
+        Processor<Data, Object, Data> processor = new Processor<>(1024, partitioner, 100000, outHandle, work);
+        final Thread meterThread = new Thread(new Meter(processor), "Meter");
+        meterThread.setDaemon(true);
+        meterThread.start();
         while (true) {
-            processor.dispatch(new Data());
-            printGraphStatus(processor);
+            if (!processor.dispatch(new Data())) {
+                Thread.yield();
+            }
         }
     }
 
-    private void printGraphStatus(final Processor<Data, Data> obs) {
-        long now = System.currentTimeMillis();
-        final long timeSpan = now - lastPrintTime;
-        if (timeSpan < 1000) {
-            return;
+    @Test
+    public void test() {
+        new Loop().start();
+        while (true) {
+            l++;
         }
-        final long outToken = obs.getOutToken();
-        final long outTokenDelta = outToken - lastOutToken;
-        final long outTokenPS = outTokenDelta / timeSpan;
+    }
 
-        int cache = obs.getCache();
+    private volatile long l;
 
-        StringBuilder sb = new StringBuilder();
-                sb.append("\toutTokenPerSec: ").append(outTokenPS)
-                .append("\tcache: ").append(cache);
-        System.out.println(sb.toString());
+    class Loop extends Thread {
 
-        lastOutToken = outToken;
-        lastPrintTime = now;
+        /** The Last print time. */
+        private long lastPrintTime = 0;
+
+        /** The Last out token. */
+        private long lastOutToken = 0;
+
+        @Override
+        public void run() {
+            while (true) {
+                long now = System.currentTimeMillis();
+                final long timeSpan = now - lastPrintTime;
+                final long outTokenDelta = l -  lastOutToken;
+                final long outTokenPS = outTokenDelta / timeSpan;
+
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("\toutTokenPerSec: ").append(outTokenPS);
+                System.out.println(sb.toString());
+
+                lastOutToken = l;
+                lastPrintTime = now;
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+
+        }
     }
 
     /**

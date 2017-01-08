@@ -15,7 +15,6 @@ import org.junit.After;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 
-import com.y3r9.c47.dog.CasLock;
 import com.y3r9.c47.dog.swj.config.key.ParallelKey;
 import com.y3r9.c47.dog.swj.config.key.PollingKey;
 import com.y3r9.c47.dog.swj.model.collection.SafeInDualQueue;
@@ -45,8 +44,8 @@ public final class SwjTest {
 
 //        DualQueue<Integer> queue = new SafeInDualQueue<>();
 //        Queue<Integer> queue = new ConcurrentLinkedDeque<>();
-//        final Lock lock = new ReentrantLock();
-        final Lock lock = new CasLock();
+        final Lock lock = new ReentrantLock();
+//        final Lock lock = new CasLock();
 
 
         Integer in = new Integer(10);
@@ -122,7 +121,7 @@ public final class SwjTest {
 
     private Configuration getNtrParseParallelConfig() {
         final Configuration result = new XMLConfiguration();
-        result.addProperty(ParallelKey.workerCount.name(), 4);
+        result.addProperty(ParallelKey.workerCount.name(), 5);
         result.addProperty(ParallelKey.partitionCount.name(), 1024);
 //        result.addProperty(ParallelKey.joinPipeCapability.name(), 4000000);
 //        result.addProperty(ParallelKey.cacheTokenCount.name(), 1000000);
@@ -136,8 +135,8 @@ public final class SwjTest {
 
         Configuration workNodeConfig = new XMLConfiguration();
         result.addProperty(ParallelKey.workNode.name(), workNodeConfig);
-        workNodeConfig.addProperty(PollingKey.idleRetryCount.name(), 100);
-        workNodeConfig.addProperty(PollingKey.idleParkMode.name(), "sleep");
+        workNodeConfig.addProperty(PollingKey.idleRetryCount.name(), 8);
+        workNodeConfig.addProperty(PollingKey.idleParkMode.name(), "yield");
 
         Configuration joinNodeConfig = new XMLConfiguration();
         result.addProperty(ParallelKey.joinNode.name(), joinNodeConfig);
