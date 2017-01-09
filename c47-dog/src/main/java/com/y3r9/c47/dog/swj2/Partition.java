@@ -19,7 +19,7 @@ final class Partition {
     }
 
     int consume() {
-        final int deadLine = tail;
+        int deadLine = tail;
         int index = head;
         while (index != deadLine) {
             final SwjData input = queue[index];

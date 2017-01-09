@@ -33,7 +33,7 @@ public final class Swj2Test {
         final WorkHandler<Data, Object, Data> work = new Work();
 
 
-        Processor<Data, Object, Data> processor = new Processor<>(1024, partitioner, 100000, outHandle, work);
+        Processor<Data, Object, Data> processor = new Processor<>(4, partitioner, 100000, outHandle, work);
         final Thread meterThread = new Thread(new Meter(processor), "Meter");
         meterThread.setDaemon(true);
         meterThread.start();
@@ -49,10 +49,14 @@ public final class Swj2Test {
         new Loop().start();
         while (true) {
             l++;
+            int sum = 0;
+            for (int i = 0; i < 100; i++) {
+                sum += 1;
+            }
         }
     }
 
-    private volatile long l;
+    private long l;
 
     class Loop extends Thread {
 

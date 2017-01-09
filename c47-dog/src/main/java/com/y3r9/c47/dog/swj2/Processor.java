@@ -129,7 +129,7 @@ public final class Processor<I extends SwjData, C, O> {
                 head = (oldHead + 1) & cacheSizeMask;
                 outHandler.handle(out);
             }
-            System.out.println("sprint " + count);
+//            System.out.println("sprint " + count);
             for (Core core : cores) {
                 core.prepareNextSprint();
             }
